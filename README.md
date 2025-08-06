@@ -1,4 +1,4 @@
-# asteroid-blaster
+# asteroid-blaster-2025
 by Rich Lewis
 
 ![License](https://img.shields.io/badge/license-mit-blue.svg)
@@ -9,12 +9,15 @@ by Rich Lewis
 
 ## Description
 Fly through space in your web browser, shooting asteroids and bad guys!
-A very simple in-browser game.
+A very simple in-browser game. Simple graphics. Simple sound. 
+All code in the 1 html file.
 
 ## Features
 - Control your ship using the keyboard or mouse
 - Crazy simple sound effects
-- SPACE ACTION!
+- CRAZY SPACE ACTION!
+- Uses GSAP for animation: https://gsap.com/
+- Uses Tone library for sounds: https://tonejs.github.io/
 
 ## Getting Started
 ```bash
@@ -24,7 +27,8 @@ cd asteroid-blaster
 ```
 
 ## Usage
-Self explanatory!
+SETM.
+(Shoot Everything That Moves)
 
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
