@@ -47,7 +47,7 @@
 
         #modal {
             position: absolute;
-            background-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(0, 0, 0, 0.85);
             border-radius: 15px;
             padding: 40px;
             text-align: center;
@@ -57,6 +57,8 @@
             justify-content: center;
             border: 2px solid #0ff;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+            width: 80%;
+            max-width: 600px;
         }
 
         #modal h1 {
@@ -81,11 +83,69 @@
             cursor: pointer;
             text-shadow: 2px 2px 4px #000;
             transition: all 0.2s ease;
+            margin-top: 20px;
         }
 
         #start-button:hover {
             transform: scale(1.1);
             box-shadow: 0 0 20px #f0f, 0 0 40px #0ff;
+        }
+
+        /* High Score Styles */
+        #high-score-form {
+            margin-top: 20px;
+        }
+
+        #player-name-input {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            padding: 10px;
+            text-align: center;
+            background-color: #222;
+            border: 2px solid #0ff;
+            color: #fff;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        #save-score-button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            padding: 12px 20px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #high-score-list {
+            list-style: none;
+            padding: 0;
+            width: 100%;
+            font-size: 18px;
+            text-align: left;
+        }
+
+        #high-score-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        #high-score-list li:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        #high-score-list .score-name {
+            color: #0ff;
+        }
+
+        #high-score-list .score-value {
+            color: #f0f;
         }
     </style>
 </head>
@@ -99,9 +159,19 @@
         </div>
         <div id="modal">
             <h1 id="modal-title">ASTEROID BLASTER</h1>
-            <p id="modal-score">Final Score: 0</p>
-            <p style="font-size: 16px; margin-top: 20px;">Use Arrow Keys or WASD to Move<br>Aim with Mouse,
-                Spacebar/Click to Shoot<br>Press ESC to End Game</p>
+            <div id="modal-content">
+                <p id="modal-score">Final Score: 0</p>
+                <p style="font-size: 16px; margin-top: 20px;">Use Arrow Keys or WASD to Move<br>Aim with Mouse,
+                    Spacebar/Click to Shoot<br>Press ESC to End Game</p>
+                <div id="high-score-form" style="display: none;">
+                    <input type="text" id="player-name-input" placeholder="Enter Your Name" maxlength="10">
+                    <button id="save-score-button">Save Score</button>
+                </div>
+                <div id="high-score-display" style="display: none;">
+                    <h2>High Scores</h2>
+                    <ol id="high-score-list"></ol>
+                </div>
+            </div>
             <button id="start-button">Start Game</button>
         </div>
     </div>
@@ -113,75 +183,111 @@
         const scoreEl = document.getElementById('scoreEl');
         const uiContainer = document.getElementById('ui-container');
         const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
         const modalScoreEl = document.getElementById('modal-score');
         const modalTitleEl = document.getElementById('modal-title');
         const startButton = document.getElementById('start-button');
+        const highScoreForm = document.getElementById('high-score-form');
+        const playerNameInput = document.getElementById('player-name-input');
+        const saveScoreButton = document.getElementById('save-score-button');
+        const highScoreDisplay = document.getElementById('high-score-display');
+        const highScoreList = document.getElementById('high-score-list');
 
         let animationId;
         let score = 0;
         let gameActive = false;
+        let inactivityTimer;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
         // --- Sound Synthesis with Tone.js ---
-        const synth = new Tone.Synth().toDestination();
-        const metalSynth = new Tone.MetalSynth({ // For enemy hits
-            frequency: 100,
-            envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-            harmonicity: 5.1,
-            modulationIndex: 32,
-            resonance: 4000,
-            octaves: 1.5
-        }).toDestination();
-
-        // New, better explosion sound for player death
-        const playerDeathSynth = new Tone.NoiseSynth({
-            noise: { type: 'brown' },
-            envelope: { attack: 0.005, decay: 0.3, sustain: 0, release: 0.4 }
-        }).toDestination();
-        const playerDeathBoom = new Tone.MembraneSynth({
-            pitchDecay: 0.05,
-            octaves: 10,
-            oscillator: { type: 'sine' },
-            envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' }
-        }).toDestination();
-
-
+        const startGameSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
+        function playStartGameSound() {
+            if (Tone.context.state !== 'running') Tone.context.resume();
+            const now = Tone.now();
+            startGameSynth.triggerAttackRelease("C4", "16n", now);
+            startGameSynth.triggerAttackRelease("E4", "16n", now + 0.1);
+            startGameSynth.triggerAttackRelease("G4", "16n", now + 0.2);
+            startGameSynth.triggerAttackRelease("C5", "8n", now + 0.3);
+        }
+        const shootSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 } }).toDestination();
         function playShootSound() {
-            if (Tone.context.state !== 'running') {
-                Tone.context.resume();
-            }
-            synth.triggerAttackRelease("C5", "8n");
+            if (Tone.context.state !== 'running') Tone.context.resume();
+            shootSynth.triggerAttackRelease("G5", "32n");
+        }
+        const enemyExplosionSynth = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 5, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination();
+        const enemyExplosionNoise = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination();
+        enemyExplosionNoise.volume.value = -10;
+        function playExplosionSound() {
+            if (Tone.context.state !== 'running') Tone.context.resume();
+            enemyExplosionSynth.triggerAttackRelease("C2", "8n", Tone.now());
+            enemyExplosionNoise.triggerAttackRelease("4n", Tone.now());
+        }
+        const playerBoom = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.5, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).toDestination();
+        playerBoom.volume.value = -3;
+        const playerNoise = new Tone.NoiseSynth({ noise: { type: 'brown' }, envelope: { attack: 0.005, decay: 0.4, sustain: 0.1, release: 0.5 } }).toDestination();
+        playerNoise.volume.value = -5;
+        const playerWail = new Tone.FMSynth({ harmonicity: 1.5, modulationIndex: 10, envelope: { attack: 0.1, decay: 0.5, sustain: 0.1, release: 1.0 }, modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.0 } }).toDestination();
+        playerWail.volume.value = -6;
+        function playPlayerDeathSound() {
+            if (Tone.context.state !== 'running') Tone.context.resume();
+            const now = Tone.now();
+            playerBoom.triggerAttackRelease("C1", "1n", now);
+            playerNoise.triggerAttackRelease("0.5n", now);
+            playerWail.triggerAttack("E4", now + 0.05);
+            playerWail.frequency.rampTo("C2", 0.7, now + 0.1);
+            playerWail.triggerRelease(now + 0.8);
         }
 
-        function playExplosionSound() { // For hitting enemies
-            if (Tone.context.state !== 'running') {
-                Tone.context.resume();
-            }
-            metalSynth.triggerAttackRelease("C2", "4n");
+        // --- High Score Management ---
+        const HIGH_SCORES_KEY = 'asteroidBlasterHighScores';
+        function loadHighScores() {
+            const scores = localStorage.getItem(HIGH_SCORES_KEY);
+            return scores ? JSON.parse(scores) : [];
         }
-
-        function playPlayerDeathSound() { // For player death
-            if (Tone.context.state !== 'running') {
-                Tone.context.resume();
-            }
-            playerDeathBoom.triggerAttackRelease("C1", "2n");
-            playerDeathSynth.triggerAttackRelease("1n");
+        function saveHighScores(scores) {
+            localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(scores));
         }
-
+        function addHighScore(name, score) {
+            const scores = loadHighScores();
+            scores.push({ name, score });
+            scores.sort((a, b) => b.score - a.score);
+            const top10 = scores.slice(0, 10);
+            saveHighScores(top10);
+        }
+        function displayHighScores() {
+            highScoreForm.style.display = 'none';
+            modalScoreEl.style.display = 'none';
+            highScoreDisplay.style.display = 'block';
+            highScoreList.innerHTML = '';
+            const scores = loadHighScores();
+            if (scores.length === 0) {
+                highScoreList.innerHTML = '<li>No scores yet!</li>';
+                return;
+            }
+            scores.forEach(score => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="score-name">${score.name}</span> <span class="score-value">${score.score}</span>`;
+                highScoreList.appendChild(li);
+            });
+        }
 
         // --- Game Object Classes ---
-
-        // Player (Spaceship)
+        class Star {
+            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
+            update() {
+                this.draw();
+                this.y += this.velocity.y;
+                if (this.y - this.radius > canvas.height) { this.y = 0 - this.radius; this.x = Math.random() * canvas.width; }
+            }
+        }
         class Player {
             constructor(x, y, radius, color) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
+                this.x = x; this.y = y; this.radius = radius; this.color = color;
                 this.velocity = { x: 0, y: 0 };
-                this.speed = 5;
+                this.speed = 0.4; // Acceleration force
+                this.friction = 0.97; // Damping factor
             }
-
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
@@ -199,9 +305,11 @@
                 ctx.stroke();
                 ctx.restore();
             }
-
             update() {
                 this.draw();
+                // Apply friction to slow down
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
                 if (this.x - this.radius < 0) this.x = this.radius;
@@ -210,229 +318,105 @@
                 if (this.y + this.radius > canvas.height) this.y = canvas.height - this.radius;
             }
         }
-
-        // Projectile
         class Projectile {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-
-            update() {
-                this.draw();
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-            }
+            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; }
+            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
+            update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; }
         }
-
-        // Enemy (Asteroids & Ships)
         class Enemy {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-                this.type = Math.random() < 0.7 ? 'asteroid' : 'ship';
-                this.sides = Math.floor(Math.random() * 3) + 5;
-            }
-
+            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; this.type = Math.random() < 0.7 ? 'asteroid' : 'ship'; this.sides = Math.floor(Math.random() * 3) + 5; }
             draw() {
                 ctx.beginPath();
                 if (this.type === 'asteroid') {
                     ctx.moveTo(this.x + this.radius * Math.cos(0), this.y + this.radius * Math.sin(0));
-                    for (let i = 1; i <= this.sides; i++) {
-                        ctx.lineTo(this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides));
-                    }
+                    for (let i = 1; i <= this.sides; i++) { ctx.lineTo(this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides)); }
                     ctx.closePath();
-                    ctx.strokeStyle = this.color;
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
+                    ctx.strokeStyle = this.color; ctx.lineWidth = 3; ctx.stroke();
                 } else {
-                    ctx.moveTo(this.x, this.y - this.radius);
-                    ctx.lineTo(this.x - this.radius, this.y + this.radius);
-                    ctx.lineTo(this.x + this.radius, this.y + this.radius);
-                    ctx.closePath();
-                    ctx.fillStyle = this.color;
-                    ctx.fill();
+                    ctx.moveTo(this.x, this.y - this.radius); ctx.lineTo(this.x - this.radius, this.y + this.radius); ctx.lineTo(this.x + this.radius, this.y + this.radius);
+                    ctx.closePath(); ctx.fillStyle = this.color; ctx.fill();
                 }
             }
-
-            update() {
-                this.draw();
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-            }
+            update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; }
         }
-
-        // Particle effect for explosions
-        const friction = 0.99;
         class Particle {
-            constructor(x, y, radius, color, velocity) {
-                this.x = x;
-                this.y = y;
-                this.radius = radius;
-                this.color = color;
-                this.velocity = velocity;
-                this.alpha = 1;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                ctx.restore();
-            }
-
-            update() {
-                this.draw();
-                this.velocity.x *= friction;
-                this.velocity.y *= friction;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-                this.alpha -= 0.01;
-            }
+            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; this.alpha = 1; }
+            draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); ctx.restore(); }
+            update() { this.draw(); this.velocity.x *= 0.99; this.velocity.y *= 0.99; this.x += this.velocity.x; this.y += this.velocity.y; this.alpha -= 0.01; }
         }
 
         // --- Game State & Initialization ---
-        let player;
-        let projectiles;
-        let enemies;
-        let particles;
-        let enemySpawnInterval;
-
+        let player, projectiles, enemies, particles, stars, enemySpawnInterval;
         function init() {
             gameActive = true;
             score = 0;
             scoreEl.innerHTML = score;
             uiContainer.style.display = 'block';
             modal.style.display = 'none';
-
             player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white');
-            projectiles = [];
-            enemies = [];
-            particles = [];
-
+            projectiles = []; enemies = []; particles = []; stars = [];
+            for (let i = 0; i < 100; i++) {
+                const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height;
+                const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`;
+                stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 }));
+            }
             spawnEnemies();
         }
-
-        // --- Enemy Spawning ---
         function spawnEnemies() {
             if (enemySpawnInterval) clearInterval(enemySpawnInterval);
             enemySpawnInterval = setInterval(() => {
                 if (!gameActive) return;
-
-                const radius = Math.random() * (30 - 10) + 10;
+                const r = Math.random() * (30 - 10) + 10;
                 let x, y;
-
-                if (Math.random() < 0.5) {
-                    x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-                    y = Math.random() * canvas.height;
-                } else {
-                    x = Math.random() * canvas.width;
-                    y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
-                }
-
+                if (Math.random() < 0.5) { x = Math.random() < 0.5 ? 0 - r : canvas.width + r; y = Math.random() * canvas.height; } else { x = Math.random() * canvas.width; y = Math.random() < 0.5 ? 0 - r : canvas.height + r; }
                 const angle = Math.atan2(player.y - y, player.x - x);
                 const speed = 1 + (score / 500);
-                const velocity = {
-                    x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
-                };
-                const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-
-                enemies.push(new Enemy(x, y, radius, color, velocity));
+                const vel = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
+                enemies.push(new Enemy(x, y, r, `hsl(${Math.random() * 360}, 50%, 50%)`, vel));
             }, 1000);
         }
-
-        // --- Game Over ---
         function endGame() {
             if (!gameActive) return;
             gameActive = false;
             cancelAnimationFrame(animationId);
             clearInterval(enemySpawnInterval);
-
             modal.style.display = 'flex';
             modalScoreEl.style.display = 'block';
             modalScoreEl.innerHTML = `Final Score: ${score}`;
+            highScoreForm.style.display = 'block';
+            highScoreDisplay.style.display = 'none';
             modalTitleEl.textContent = "Game Over";
             startButton.textContent = "Restart Game";
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(displayHighScores, 30000); // 30 seconds
         }
 
         // --- Animation Loop ---
         function animate() {
             if (!gameActive) return;
             animationId = requestAnimationFrame(animate);
-            ctx.fillStyle = 'rgba(10, 10, 26, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            handleMovement();
-            player.update();
-
-            particles.forEach((particle, index) => {
-                if (particle.alpha <= 0) {
-                    particles.splice(index, 1);
-                } else {
-                    particle.update();
-                }
+            ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => s.update());
+            handleMovement(); player.update();
+            particles.forEach((p, i) => { if (p.alpha <= 0) { particles.splice(i, 1); } else { p.update(); } });
+            projectiles.forEach((p, i) => {
+                p.update();
+                if (p.x + p.radius < 0 || p.x - p.radius > canvas.width || p.y + p.radius < 0 || p.y - p.radius > canvas.height) { setTimeout(() => { projectiles.splice(i, 1); }, 0); }
             });
-
-            projectiles.forEach((projectile, pIndex) => {
-                projectile.update();
-                if (projectile.x + projectile.radius < 0 ||
-                    projectile.x - projectile.radius > canvas.width ||
-                    projectile.y + projectile.radius < 0 ||
-                    projectile.y - projectile.radius > canvas.height) {
-                    setTimeout(() => {
-                        projectiles.splice(pIndex, 1);
-                    }, 0);
-                }
-            });
-
             enemies.forEach((enemy, eIndex) => {
                 enemy.update();
-
-                const distPlayerEnemy = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-                if (distPlayerEnemy - enemy.radius - player.radius < 1) {
-                    playPlayerDeathSound();
-                    endGame();
-                }
-
+                if (Math.hypot(player.x - enemy.x, player.y - enemy.y) - enemy.radius - player.radius < 1) { playPlayerDeathSound(); endGame(); }
                 projectiles.forEach((projectile, pIndex) => {
-                    const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
-                    if (dist - enemy.radius - projectile.radius < 1) {
-                        for (let i = 0; i < enemy.radius * 2; i++) {
-                            particles.push(new Particle(
-                                projectile.x, projectile.y, Math.random() * 2, enemy.color,
-                                { x: (Math.random() - 0.5) * (Math.random() * 6), y: (Math.random() - 0.5) * (Math.random() * 6) }
-                            ));
-                        }
+                    if (Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y) - enemy.radius - projectile.radius < 1) {
+                        for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); }
                         playExplosionSound();
                         if (enemy.radius - 10 > 10) {
-                            score += 100;
-                            scoreEl.innerHTML = score;
+                            score += 100; scoreEl.innerHTML = score;
                             gsap.to(enemy, { radius: enemy.radius - 10 });
                             setTimeout(() => { projectiles.splice(pIndex, 1); }, 0);
                         } else {
-                            score += 250;
-                            scoreEl.innerHTML = score;
-                            setTimeout(() => {
-                                enemies.splice(eIndex, 1);
-                                projectiles.splice(pIndex, 1);
-                            }, 0);
+                            score += 250; scoreEl.innerHTML = score;
+                            setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0);
                         }
                     }
                 });
@@ -440,124 +424,76 @@
         }
 
         // --- Event Listeners & Controls ---
-        const keys = {
-            ArrowUp: { pressed: false },
-            ArrowDown: { pressed: false },
-            ArrowLeft: { pressed: false },
-            ArrowRight: { pressed: false }
-        };
-
+        const keys = { up: false, down: false, left: false, right: false };
         function handleMovement() {
             if (!player) return;
-            player.velocity.x = 0;
-            player.velocity.y = 0;
-            if (keys.ArrowUp.pressed) player.velocity.y = -player.speed;
-            if (keys.ArrowDown.pressed) player.velocity.y = player.speed;
-            if (keys.ArrowLeft.pressed) player.velocity.x = -player.speed;
-            if (keys.ArrowRight.pressed) player.velocity.x = player.speed;
+            if (keys.up) player.velocity.y -= player.speed;
+            if (keys.down) player.velocity.y += player.speed;
+            if (keys.left) player.velocity.x -= player.speed;
+            if (keys.right) player.velocity.x += player.speed;
         }
-
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && gameActive) {
-                endGame();
-            }
-
-            // Handle movement keys (Arrow keys and WASD)
+            if (e.key === 'Escape' && gameActive) endGame();
             switch (e.key.toLowerCase()) {
-                case 'arrowup':
-                case 'w':
-                    keys.ArrowUp.pressed = true;
-                    break;
-                case 'arrowdown':
-                case 's':
-                    keys.ArrowDown.pressed = true;
-                    break;
-                case 'arrowleft':
-                case 'a':
-                    keys.ArrowLeft.pressed = true;
-                    break;
-                case 'arrowright':
-                case 'd':
-                    keys.ArrowRight.pressed = true;
-                    break;
+                case 'arrowup': case 'w': keys.up = true; break;
+                case 'arrowdown': case 's': keys.down = true; break;
+                case 'arrowleft': case 'a': keys.left = true; break;
+                case 'arrowright': case 'd': keys.right = true; break;
             }
-
-            if (e.code === 'Space' && gameActive) {
-                shootProjectile();
-            }
+            if (e.code === 'Space' && gameActive) shootProjectile();
         });
-
         window.addEventListener('keyup', (e) => {
-            // Handle movement keys (Arrow keys and WASD)
             switch (e.key.toLowerCase()) {
-                case 'arrowup':
-                case 'w':
-                    keys.ArrowUp.pressed = false;
-                    break;
-                case 'arrowdown':
-                case 's':
-                    keys.ArrowDown.pressed = false;
-                    break;
-                case 'arrowleft':
-                case 'a':
-                    keys.ArrowLeft.pressed = false;
-                    break;
-                case 'arrowright':
-                case 'd':
-                    keys.ArrowRight.pressed = false;
-                    break;
+                case 'arrowup': case 'w': keys.up = false; break;
+                case 'arrowdown': case 's': keys.down = false; break;
+                case 'arrowleft': case 'a': keys.left = false; break;
+                case 'arrowright': case 'd': keys.right = false; break;
             }
         });
-
-        window.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouse.x = e.clientX - rect.left;
-            mouse.y = e.clientY - rect.top;
-        });
-
+        window.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; });
         function shootProjectile() {
             if (!player) return;
             playShootSound();
             const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
-            const velocity = {
-                x: Math.cos(angle) * 10,
-                y: Math.sin(angle) * 10
-            };
-            projectiles.push(new Projectile(player.x, player.y, 5, '#0ff', velocity));
+            projectiles.push(new Projectile(player.x, player.y, 5, '#0ff', { x: Math.cos(angle) * 10, y: Math.sin(angle) * 10 }));
         }
-
-        canvas.addEventListener('click', () => {
-            if (!gameActive) return;
-            shootProjectile();
-        });
-
+        canvas.addEventListener('click', () => { if (gameActive) shootProjectile(); });
         startButton.addEventListener('click', () => {
-            init();
-            animate();
+            clearTimeout(inactivityTimer);
+            playStartGameSound();
+            setTimeout(() => { init(); animate(); }, 100);
+        });
+        saveScoreButton.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (name) {
+                addHighScore(name, score);
+                highScoreForm.style.display = 'none';
+                displayHighScores();
+            }
         });
 
-        // --- Window Resizing ---
+        // --- Window Resizing & Initial Setup ---
         function resizeCanvas() {
-            const containerRect = document.getElementById('game-container').getBoundingClientRect();
-            const size = Math.min(containerRect.width * 0.9, containerRect.height * 0.9, 800);
-            canvas.width = size;
-            canvas.height = size;
-            if (player) {
-                player.x = canvas.width / 2;
-                player.y = canvas.height / 2;
+            const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800);
+            canvas.width = size; canvas.height = size;
+            if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; }
+            if (gameActive || !stars) {
+                stars = [];
+                for (let i = 0; i < 100; i++) {
+                    const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height;
+                    const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`;
+                    stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 }));
+                }
             }
         }
-
         window.addEventListener('resize', resizeCanvas);
-
-        // Initial setup
         resizeCanvas();
         modalScoreEl.style.display = 'none';
-
+        highScoreForm.style.display = 'none';
+        highScoreDisplay.style.display = 'none';
         const gsapScript = document.createElement('script');
         gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
         document.head.appendChild(gsapScript);
-
     </script>
 </body>
 
