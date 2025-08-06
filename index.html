@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asteroid Blaster 2025</title>
+    <title>Spaceship Shooter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -34,6 +34,7 @@
             display: block;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            cursor: crosshair;
         }
 
         #ui-container {
@@ -99,8 +100,8 @@
         <div id="modal">
             <h1 id="modal-title">ASTEROID BLASTER</h1>
             <p id="modal-score">Final Score: 0</p>
-            <p style="font-size: 16px; margin-top: 20px;">Use Arrow Keys or Mouse to Move<br>Spacebar or Click to Shoot
-            </p>
+            <p style="font-size: 16px; margin-top: 20px;">Use Arrow Keys or WASD to Move<br>Aim with Mouse,
+                Spacebar/Click to Shoot<br>Press ESC to End Game</p>
             <button id="start-button">Start Game</button>
         </div>
     </div>
@@ -119,10 +120,11 @@
         let animationId;
         let score = 0;
         let gameActive = false;
+        const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
         // --- Sound Synthesis with Tone.js ---
         const synth = new Tone.Synth().toDestination();
-        const metalSynth = new Tone.MetalSynth({
+        const metalSynth = new Tone.MetalSynth({ // For enemy hits
             frequency: 100,
             envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
             harmonicity: 5.1,
@@ -131,6 +133,19 @@
             octaves: 1.5
         }).toDestination();
 
+        // New, better explosion sound for player death
+        const playerDeathSynth = new Tone.NoiseSynth({
+            noise: { type: 'brown' },
+            envelope: { attack: 0.005, decay: 0.3, sustain: 0, release: 0.4 }
+        }).toDestination();
+        const playerDeathBoom = new Tone.MembraneSynth({
+            pitchDecay: 0.05,
+            octaves: 10,
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4, attackCurve: 'exponential' }
+        }).toDestination();
+
+
         function playShootSound() {
             if (Tone.context.state !== 'running') {
                 Tone.context.resume();
@@ -138,12 +153,21 @@
             synth.triggerAttackRelease("C5", "8n");
         }
 
-        function playExplosionSound() {
+        function playExplosionSound() { // For hitting enemies
             if (Tone.context.state !== 'running') {
                 Tone.context.resume();
             }
             metalSynth.triggerAttackRelease("C2", "4n");
         }
+
+        function playPlayerDeathSound() { // For player death
+            if (Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+            playerDeathBoom.triggerAttackRelease("C1", "2n");
+            playerDeathSynth.triggerAttackRelease("1n");
+        }
+
 
         // --- Game Object Classes ---
 
@@ -155,16 +179,18 @@
                 this.radius = radius;
                 this.color = color;
                 this.velocity = { x: 0, y: 0 };
-                this.speed = 7;
+                this.speed = 5;
             }
 
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
+                const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+                ctx.rotate(angle);
                 ctx.beginPath();
-                ctx.moveTo(0, -this.radius);
-                ctx.lineTo(this.radius * 0.8, this.radius * 0.8);
-                ctx.lineTo(-this.radius * 0.8, this.radius * 0.8);
+                ctx.moveTo(this.radius, 0);
+                ctx.lineTo(-this.radius * 0.7, -this.radius * 0.8);
+                ctx.lineTo(-this.radius * 0.7, this.radius * 0.8);
                 ctx.closePath();
                 ctx.fillStyle = this.color;
                 ctx.fill();
@@ -178,8 +204,6 @@
                 this.draw();
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
-
-                // Boundary checks
                 if (this.x - this.radius < 0) this.x = this.radius;
                 if (this.x + this.radius > canvas.width) this.x = canvas.width - this.radius;
                 if (this.y - this.radius < 0) this.y = this.radius;
@@ -219,8 +243,8 @@
                 this.radius = radius;
                 this.color = color;
                 this.velocity = velocity;
-                this.type = Math.random() < 0.7 ? 'asteroid' : 'ship'; // 70% chance of asteroid
-                this.sides = Math.floor(Math.random() * 3) + 5; // 5 to 7 sides for asteroids
+                this.type = Math.random() < 0.7 ? 'asteroid' : 'ship';
+                this.sides = Math.floor(Math.random() * 3) + 5;
             }
 
             draw() {
@@ -234,7 +258,7 @@
                     ctx.strokeStyle = this.color;
                     ctx.lineWidth = 3;
                     ctx.stroke();
-                } else { // It's a ship
+                } else {
                     ctx.moveTo(this.x, this.y - this.radius);
                     ctx.lineTo(this.x - this.radius, this.y + this.radius);
                     ctx.lineTo(this.x + this.radius, this.y + this.radius);
@@ -322,8 +346,8 @@
                     y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
                 }
 
-                const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
-                const speed = 1 + (score / 500); // Speed increases with score
+                const angle = Math.atan2(player.y - y, player.x - x);
+                const speed = 1 + (score / 500);
                 const velocity = {
                     x: Math.cos(angle) * speed,
                     y: Math.sin(angle) * speed
@@ -331,16 +355,18 @@
                 const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
 
                 enemies.push(new Enemy(x, y, radius, color, velocity));
-            }, 1000); // Spawn an enemy every second
+            }, 1000);
         }
 
         // --- Game Over ---
         function endGame() {
+            if (!gameActive) return;
             gameActive = false;
             cancelAnimationFrame(animationId);
             clearInterval(enemySpawnInterval);
 
             modal.style.display = 'flex';
+            modalScoreEl.style.display = 'block';
             modalScoreEl.innerHTML = `Final Score: ${score}`;
             modalTitleEl.textContent = "Game Over";
             startButton.textContent = "Restart Game";
@@ -350,12 +376,12 @@
         function animate() {
             if (!gameActive) return;
             animationId = requestAnimationFrame(animate);
-            ctx.fillStyle = 'rgba(10, 10, 26, 0.1)'; // Fading effect
+            ctx.fillStyle = 'rgba(10, 10, 26, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            handleMovement();
             player.update();
 
-            // Update particles
             particles.forEach((particle, index) => {
                 if (particle.alpha <= 0) {
                     particles.splice(index, 1);
@@ -364,11 +390,8 @@
                 }
             });
 
-            // Update projectiles
             projectiles.forEach((projectile, pIndex) => {
                 projectile.update();
-
-                // Remove projectiles that go off-screen
                 if (projectile.x + projectile.radius < 0 ||
                     projectile.x - projectile.radius > canvas.width ||
                     projectile.y + projectile.radius < 0 ||
@@ -379,55 +402,33 @@
                 }
             });
 
-            // Update enemies and check for collisions
             enemies.forEach((enemy, eIndex) => {
                 enemy.update();
 
-                // Collision: Player vs Enemy
                 const distPlayerEnemy = Math.hypot(player.x - enemy.x, player.y - enemy.y);
                 if (distPlayerEnemy - enemy.radius - player.radius < 1) {
-                    playExplosionSound();
+                    playPlayerDeathSound();
                     endGame();
                 }
 
-                // Collision: Projectile vs Enemy
                 projectiles.forEach((projectile, pIndex) => {
                     const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
-
                     if (dist - enemy.radius - projectile.radius < 1) {
-                        // Create explosion particles
                         for (let i = 0; i < enemy.radius * 2; i++) {
                             particles.push(new Particle(
-                                projectile.x,
-                                projectile.y,
-                                Math.random() * 2,
-                                enemy.color,
-                                {
-                                    x: (Math.random() - 0.5) * (Math.random() * 6),
-                                    y: (Math.random() - 0.5) * (Math.random() * 6)
-                                }
+                                projectile.x, projectile.y, Math.random() * 2, enemy.color,
+                                { x: (Math.random() - 0.5) * (Math.random() * 6), y: (Math.random() - 0.5) * (Math.random() * 6) }
                             ));
                         }
-
                         playExplosionSound();
-
                         if (enemy.radius - 10 > 10) {
-                            // Increase score
                             score += 100;
                             scoreEl.innerHTML = score;
-
-                            // Shrink enemy or create smaller ones (like classic asteroids)
-                            gsap.to(enemy, {
-                                radius: enemy.radius - 10
-                            });
-                            setTimeout(() => {
-                                projectiles.splice(pIndex, 1);
-                            }, 0);
+                            gsap.to(enemy, { radius: enemy.radius - 10 });
+                            setTimeout(() => { projectiles.splice(pIndex, 1); }, 0);
                         } else {
-                            // Increase score for destroying enemy
                             score += 250;
                             scoreEl.innerHTML = score;
-
                             setTimeout(() => {
                                 enemies.splice(eIndex, 1);
                                 projectiles.splice(pIndex, 1);
@@ -447,6 +448,7 @@
         };
 
         function handleMovement() {
+            if (!player) return;
             player.velocity.x = 0;
             player.velocity.y = 0;
             if (keys.ArrowUp.pressed) player.velocity.y = -player.speed;
@@ -456,56 +458,77 @@
         }
 
         window.addEventListener('keydown', (e) => {
-            if (keys[e.key] !== undefined) {
-                keys[e.key].pressed = true;
-                handleMovement();
+            if (e.key === 'Escape' && gameActive) {
+                endGame();
             }
+
+            // Handle movement keys (Arrow keys and WASD)
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    keys.ArrowUp.pressed = true;
+                    break;
+                case 'arrowdown':
+                case 's':
+                    keys.ArrowDown.pressed = true;
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    keys.ArrowLeft.pressed = true;
+                    break;
+                case 'arrowright':
+                case 'd':
+                    keys.ArrowRight.pressed = true;
+                    break;
+            }
+
             if (e.code === 'Space' && gameActive) {
-                shootProjectile(player.x, player.y);
+                shootProjectile();
             }
         });
 
         window.addEventListener('keyup', (e) => {
-            if (keys[e.key] !== undefined) {
-                keys[e.key].pressed = false;
-                handleMovement();
+            // Handle movement keys (Arrow keys and WASD)
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    keys.ArrowUp.pressed = false;
+                    break;
+                case 'arrowdown':
+                case 's':
+                    keys.ArrowDown.pressed = false;
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    keys.ArrowLeft.pressed = false;
+                    break;
+                case 'arrowright':
+                case 'd':
+                    keys.ArrowRight.pressed = false;
+                    break;
             }
         });
 
-        // Mouse controls
-        const mouse = { x: canvas.width / 2, y: canvas.height / 2 };
         window.addEventListener('mousemove', (e) => {
-            if (!gameActive) return;
             const rect = canvas.getBoundingClientRect();
             mouse.x = e.clientX - rect.left;
             mouse.y = e.clientY - rect.top;
-
-            const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
-            player.velocity.x = Math.cos(angle) * player.speed;
-            player.velocity.y = Math.sin(angle) * player.speed;
         });
 
-        function shootProjectile(x, y) {
+        function shootProjectile() {
+            if (!player) return;
             playShootSound();
-            const angle = Math.atan2(mouse.y - y, mouse.x - x);
+            const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
             const velocity = {
                 x: Math.cos(angle) * 10,
                 y: Math.sin(angle) * 10
             };
-            projectiles.push(new Projectile(x, y, 5, '#0ff', velocity));
+            projectiles.push(new Projectile(player.x, player.y, 5, '#0ff', velocity));
         }
 
-        canvas.addEventListener('click', (e) => {
+        canvas.addEventListener('click', () => {
             if (!gameActive) return;
-            const rect = canvas.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const clickY = e.clientY - rect.top;
-
-            // Update mouse position for accurate shooting on click
-            mouse.x = clickX;
-            mouse.y = clickY;
-
-            shootProjectile(player.x, player.y);
+            shootProjectile();
         });
 
         startButton.addEventListener('click', () => {
@@ -516,12 +539,9 @@
         // --- Window Resizing ---
         function resizeCanvas() {
             const containerRect = document.getElementById('game-container').getBoundingClientRect();
-            // Set a max size for the canvas but allow it to shrink
             const size = Math.min(containerRect.width * 0.9, containerRect.height * 0.9, 800);
             canvas.width = size;
             canvas.height = size;
-
-            // Re-center player if game is active
             if (player) {
                 player.x = canvas.width / 2;
                 player.y = canvas.height / 2;
@@ -532,9 +552,8 @@
 
         // Initial setup
         resizeCanvas();
-        modalScoreEl.style.display = 'none'; // Hide score on first load
+        modalScoreEl.style.display = 'none';
 
-        // Include GSAP for smooth animations (optional but recommended)
         const gsapScript = document.createElement('script');
         gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
         document.head.appendChild(gsapScript);
