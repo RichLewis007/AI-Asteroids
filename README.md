@@ -55,7 +55,7 @@ Both features include loading indicators while the AI generates the text.
 
 Here are the steps to run the full version of the game from GitHub:
 
-  1. Get a **Free API Key:** Go to  [Google AI Studio]([https://richlewis.com](https://aistudio.google.com/app/apikey)): 
+  1. Get a **Free API Key:** Go to ![Google AI Studio]([https://richlewis.com](https://aistudio.google.com/app/apikey)): 
   2. **Create Key:** Click the "**Create API key**" button. You may need to sign in with your Google account.
   3. **Copy Key:** A new API key will be generated. **Copy this long string of letters and numbers.**
   4. **Update the Code:** Open the index.html file in a text editor and find this line:
