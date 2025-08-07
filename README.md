@@ -10,7 +10,12 @@ by Rich Lewis
 <p align="center">
   <img src="./assets/ai-asteroids-banner.png" alt="AI Asteroids Banner" width="600">
   <img src="./assets/ai-asteroids-features.png" alt="AI Asteroids Banner" width="600">
-</p>
+  
+> <div align="left">
+>   <div>
+>     <p><strong>Legal disclaimer:</strong> These graphics are in no way intended to represent actual in-game graphics. In fact, they are meant to be *deceiving*, just as the original game packaging on contemporaneous retro games deceived millions of innocent children into buying games like Asteroids™. You have been warned.</p>
+>   </div>
+> </div>
 
 <!-- ![AI Asteroids Banner](./assets/ai-asteroids-banner.png)
 ![AI Asteroids Banner](./assets/ai-asteroids-features.png)  -->
