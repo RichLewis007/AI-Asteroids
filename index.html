@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spaceship Shooter AI</title>
+    <title>AI Asteroids</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -239,7 +239,7 @@
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
         <div id="modal">
-            <h1 id="modal-title">ASTEROID BLASTER</h1>
+            <h1 id="modal-title">AI ASTEROIDS</h1>
             <div id="modal-content">
                 <!-- Game Over Content -->
                 <div id="game-over-content">
@@ -374,7 +374,7 @@
         }
 
         // --- Gemini API Integration ---
-        const API_KEY = ""; // Leave blank
+        const API_KEY = ""; // Leave blank for GitHub. See README.md for what to put here to get AI part of game to work.
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
 
         async function fetchWithExponentialBackoff(url, payload, maxRetries = 5) {
@@ -426,7 +426,7 @@
         }
 
         // --- High Score Management ---
-        const HIGH_SCORES_KEY = 'asteroidBlasterHighScores';
+        const HIGH_SCORES_KEY = 'AIAsteroidsHighScores';
         function loadHighScores() { return JSON.parse(localStorage.getItem(HIGH_SCORES_KEY) || '[]'); }
         function saveHighScores(scores) { localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(scores)); }
         function addHighScore(name, score) { const scores = loadHighScores(); scores.push({ name, score }); scores.sort((a, b) => b.score - a.score); saveHighScores(scores.slice(0, 10)); }
@@ -544,7 +544,7 @@
 
         function showStartScreen() {
             modal.style.display = 'flex';
-            modalTitleEl.textContent = "ASTEROID BLASTER";
+            modalTitleEl.textContent = "AI ASTEROIDS";
             startButton.textContent = "Start Game";
             startButton.disabled = false;
             missionBriefingContainer.style.display = 'block';
