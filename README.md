@@ -83,7 +83,7 @@ cd asteroid-blaster
 ```
 
 ## Usage
-SETM.
+S.E.T.M.
 (Shoot Everything That Moves)
 
 ## Changelog
