@@ -7,9 +7,13 @@ by Rich Lewis
 ![GitHub forks](https://img.shields.io/github/forks/RichLewis007/asteroid-blaster) -->
 <!-- ![GitHub Actions](https://github.com/RichLewis007/asteroid-blaster/actions/workflows/ci.yml/badge.svg) -->
 
-![AI Asteroids Banner](./assets/ai-asteroids-banner.png)
+<p align="center">
+  <img src="./assets/ai-asteroids-banner.png" alt="AI Asteroids Banner" width="600">
+  <img src="./assets/ai-asteroids-features.png" alt="AI Asteroids Banner" width="600">
+</p>
 
-![AI Asteroids Banner](./assets/ai-asteroids-features.png)
+<!-- ![AI Asteroids Banner](./assets/ai-asteroids-banner.png)
+![AI Asteroids Banner](./assets/ai-asteroids-features.png)  -->
 
 ## Description
 Fly through space in your web browser, shooting asteroids and bad guys!
