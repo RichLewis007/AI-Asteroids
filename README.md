@@ -2,9 +2,9 @@
 by Rich Lewis
 
 ![License](https://img.shields.io/badge/license-mit-blue.svg)
-![GitHub issues](https://img.shields.io/github/issues/RichLewis007/asteroid-blaster)
+<!-- ![GitHub issues](https://img.shields.io/github/issues/RichLewis007/asteroid-blaster)
 ![GitHub stars](https://img.shields.io/github/stars/RichLewis007/asteroid-blaster)
-![GitHub forks](https://img.shields.io/github/forks/RichLewis007/asteroid-blaster)
+![GitHub forks](https://img.shields.io/github/forks/RichLewis007/asteroid-blaster) -->
 <!-- ![GitHub Actions](https://github.com/RichLewis007/asteroid-blaster/actions/workflows/ci.yml/badge.svg) -->
 
 ![AI Asteroids Banner](./assets/ai-asteroids-banner.png)
