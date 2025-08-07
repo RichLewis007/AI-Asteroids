@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spaceship Shooter</title>
+    <title>Spaceship Shooter AI</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
@@ -51,7 +51,8 @@
             border-radius: 15px;
             padding: 40px;
             text-align: center;
-            display: flex;
+            display: none;
+            /* Start hidden */
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -61,44 +62,93 @@
             max-width: 600px;
         }
 
+        #game-over-overlay {
+            position: absolute;
+            color: #ff4444;
+            font-size: 80px;
+            text-shadow: 4px 4px 0 #000;
+            transform: scale(3);
+            opacity: 0;
+            pointer-events: none;
+            /* So it doesn't block clicks */
+            display: none;
+            /* Start hidden */
+        }
+
         #modal h1 {
             font-size: 48px;
             margin-bottom: 10px;
             color: #0ff;
         }
 
-        #modal p {
-            font-size: 24px;
-            margin-bottom: 30px;
+        #modal h2 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 20px;
         }
 
-        #start-button {
-            font-family: 'Press Start 2P', cursive;
+        #modal p {
             font-size: 24px;
-            padding: 15px 30px;
-            background: linear-gradient(45deg, #0ff, #f0f);
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            padding: 12px 20px;
             color: #fff;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             text-shadow: 2px 2px 4px #000;
             transition: all 0.2s ease;
-            margin-top: 20px;
+            margin: 5px;
         }
 
-        #start-button:hover {
-            transform: scale(1.1);
+        .action-button:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #start-button {
+            background: linear-gradient(45deg, #0ff, #f0f);
+            font-size: 24px;
+            padding: 15px 30px;
+        }
+
+        #start-button:hover:not(:disabled) {
             box-shadow: 0 0 20px #f0f, 0 0 40px #0ff;
         }
 
-        /* High Score Styles */
+        #report-button {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+        }
+
+        #report-button:hover:not(:disabled) {
+            box-shadow: 0 0 20px #8bc34a;
+        }
+
+        #high-score-button {
+            background: linear-gradient(45deg, #ffc107, #ff9800);
+        }
+
+        #high-score-button:hover:not(:disabled) {
+            box-shadow: 0 0 20px #ff9800;
+        }
+
+        /* High Score & AI Styles */
         #high-score-form {
-            margin-top: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         #player-name-input {
             font-family: 'Press Start 2P', cursive;
-            font-size: 18px;
+            font-size: 16px;
             padding: 10px;
             text-align: center;
             background-color: #222;
@@ -110,8 +160,8 @@
 
         #save-score-button {
             font-family: 'Press Start 2P', cursive;
-            font-size: 18px;
-            padding: 12px 20px;
+            font-size: 16px;
+            padding: 12px 18px;
             background: #4caf50;
             color: white;
             border: none;
@@ -119,25 +169,35 @@
             cursor: pointer;
         }
 
-        #high-score-list {
+        #high-score-list,
+        #mission-briefing,
+        #after-action-report {
+            box-sizing: border-box;
+            /* Ensures padding is included in height */
             list-style: none;
             padding: 0;
             width: 100%;
-            font-size: 18px;
+            font-size: 16px;
             text-align: left;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid #0ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 0;
+            /* Removes default margin */
+            min-height: 50px;
+            white-space: pre-wrap;
+            /* Allows line breaks */
+            max-height: 25vh;
+            /* Limit height to 25% of viewport height */
+            overflow-y: auto;
+            /* Add scrollbar if content overflows */
         }
 
         #high-score-list li {
             display: flex;
             justify-content: space-between;
-            padding: 5px 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            margin-bottom: 5px;
-            border-radius: 5px;
-        }
-
-        #high-score-list li:nth-child(odd) {
-            background-color: rgba(255, 255, 255, 0.05);
+            padding: 5px 0;
         }
 
         #high-score-list .score-name {
@@ -147,6 +207,26 @@
         #high-score-list .score-value {
             color: #f0f;
         }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #0ff;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -154,25 +234,44 @@
 
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
+        <div id="game-over-overlay">GAME OVER</div>
         <div id="ui-container" style="display: none;">
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
         <div id="modal">
             <h1 id="modal-title">ASTEROID BLASTER</h1>
             <div id="modal-content">
-                <p id="modal-score">Final Score: 0</p>
-                <p style="font-size: 16px; margin-top: 20px;">Use Arrow Keys or WASD to Move<br>Aim with Mouse,
-                    Spacebar/Click to Shoot<br>Press ESC to End Game</p>
-                <div id="high-score-form" style="display: none;">
-                    <input type="text" id="player-name-input" placeholder="Enter Your Name" maxlength="10">
-                    <button id="save-score-button">Save Score</button>
+                <!-- Game Over Content -->
+                <div id="game-over-content">
+                    <p id="modal-score" style="display: none;">Final Score: 0</p>
+                    <div id="high-score-form" style="display: none;">
+                        <input type="text" id="player-name-input" placeholder="Enter Your Name" maxlength="10">
+                        <button id="save-score-button">Save</button>
+                    </div>
                 </div>
+                <!-- High Score Display -->
                 <div id="high-score-display" style="display: none;">
                     <h2>High Scores</h2>
                     <ol id="high-score-list"></ol>
                 </div>
+                <!-- Mission Briefing -->
+                <div id="mission-briefing-container">
+                    <h2>Mission Briefing</h2>
+                    <div id="mission-briefing">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <!-- After Action Report Display -->
+                <div id="after-action-report-container" style="display: none;">
+                    <h2>After-Action Report</h2>
+                    <div id="after-action-report"></div>
+                </div>
             </div>
-            <button id="start-button">Start Game</button>
+            <div id="button-container">
+                <button id="start-button" class="action-button">Start Game</button>
+                <button id="report-button" class="action-button" style="display:none;">✨ Generate Report</button>
+                <button id="high-score-button" class="action-button" style="display:none;">🏆 High Scores</button>
+            </div>
         </div>
     </div>
 
@@ -183,45 +282,47 @@
         const scoreEl = document.getElementById('scoreEl');
         const uiContainer = document.getElementById('ui-container');
         const modal = document.getElementById('modal');
+        const gameOverOverlay = document.getElementById('game-over-overlay');
         const modalContent = document.getElementById('modal-content');
         const modalScoreEl = document.getElementById('modal-score');
         const modalTitleEl = document.getElementById('modal-title');
         const startButton = document.getElementById('start-button');
+        const reportButton = document.getElementById('report-button');
+        const highScoreButton = document.getElementById('high-score-button');
+        const buttonContainer = document.getElementById('button-container');
         const highScoreForm = document.getElementById('high-score-form');
         const playerNameInput = document.getElementById('player-name-input');
         const saveScoreButton = document.getElementById('save-score-button');
         const highScoreDisplay = document.getElementById('high-score-display');
         const highScoreList = document.getElementById('high-score-list');
+        const gameOverContent = document.getElementById('game-over-content');
+        const missionBriefingContainer = document.getElementById('mission-briefing-container');
+        const missionBriefingEl = document.getElementById('mission-briefing');
+        const afterActionReportContainer = document.getElementById('after-action-report-container');
+        const afterActionReportEl = document.getElementById('after-action-report');
 
-        let animationId;
-        let score = 0;
-        let gameActive = false;
-        let inactivityTimer;
+        let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false, restartCountdownInterval;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+        // --- Audio Initialization ---
+        async function startAudio() {
+            if (toneStarted) return;
+            await Tone.start();
+            toneStarted = true;
+            // Set listener position once audio is started
+            Tone.Listener.positionX.value = 0;
+            Tone.Listener.positionY.value = 0;
+            Tone.Listener.positionZ.value = 0;
+        }
 
         // --- Sound Synthesis with Tone.js ---
         const startGameSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
-        function playStartGameSound() {
-            if (Tone.context.state !== 'running') Tone.context.resume();
-            const now = Tone.now();
-            startGameSynth.triggerAttackRelease("C4", "16n", now);
-            startGameSynth.triggerAttackRelease("E4", "16n", now + 0.1);
-            startGameSynth.triggerAttackRelease("G4", "16n", now + 0.2);
-            startGameSynth.triggerAttackRelease("C5", "8n", now + 0.3);
-        }
+        function playStartGameSound() { const now = Tone.now(); startGameSynth.triggerAttackRelease("C4", "16n", now); startGameSynth.triggerAttackRelease("E4", "16n", now + 0.1); startGameSynth.triggerAttackRelease("G4", "16n", now + 0.2); startGameSynth.triggerAttackRelease("C5", "8n", now + 0.3); }
+
+        // Player-centric sounds connect directly to destination
         const shootSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 } }).toDestination();
-        function playShootSound() {
-            if (Tone.context.state !== 'running') Tone.context.resume();
-            shootSynth.triggerAttackRelease("G5", "32n");
-        }
-        const enemyExplosionSynth = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 5, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } }).toDestination();
-        const enemyExplosionNoise = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } }).toDestination();
-        enemyExplosionNoise.volume.value = -10;
-        function playExplosionSound() {
-            if (Tone.context.state !== 'running') Tone.context.resume();
-            enemyExplosionSynth.triggerAttackRelease("C2", "8n", Tone.now());
-            enemyExplosionNoise.triggerAttackRelease("4n", Tone.now());
-        }
+        function playShootSound() { shootSynth.triggerAttackRelease("G5", "32n"); }
+
         const playerBoom = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.5, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).toDestination();
         playerBoom.volume.value = -3;
         const playerNoise = new Tone.NoiseSynth({ noise: { type: 'brown' }, envelope: { attack: 0.005, decay: 0.4, sustain: 0.1, release: 0.5 } }).toDestination();
@@ -229,74 +330,162 @@
         const playerWail = new Tone.FMSynth({ harmonicity: 1.5, modulationIndex: 10, envelope: { attack: 0.1, decay: 0.5, sustain: 0.1, release: 1.0 }, modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.0 } }).toDestination();
         playerWail.volume.value = -6;
         function playPlayerDeathSound() {
-            if (Tone.context.state !== 'running') Tone.context.resume();
             const now = Tone.now();
-            playerBoom.triggerAttackRelease("C1", "1n", now);
-            playerNoise.triggerAttackRelease("0.5n", now);
+            playerBoom.triggerAttackRelease("C1", "1n");
+            playerNoise.triggerAttackRelease("0.5n");
             playerWail.triggerAttack("E4", now + 0.05);
             playerWail.frequency.rampTo("C2", 0.7, now + 0.1);
             playerWail.triggerRelease(now + 0.8);
         }
 
+        // --- 3D Spatial Audio for Explosions ---
+        const pannerPool = [];
+        for (let i = 0; i < 10; i++) { // Create a pool of 10 panners
+            pannerPool.push(new Tone.Panner3D().toDestination());
+        }
+        // Synths for explosions do NOT connect to destination directly
+        const enemyExplosionSynth = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 5, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } });
+        const enemyExplosionNoise = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } });
+        enemyExplosionNoise.volume.value = -10;
+
+        function playExplosionSound(x, y) {
+            if (pannerPool.length === 0) return; // No available panner
+            const panner = pannerPool.pop();
+
+            // Convert canvas coordinates to 3D audio space (-10 to 10)
+            const pannerX = (x / canvas.width - 0.5) * 20;
+            const pannerY = -(y / canvas.height - 0.5) * 20; // Invert Y
+
+            panner.positionX.value = pannerX;
+            panner.positionY.value = pannerY;
+
+            // Connect synths, play sound, then disconnect and return panner to pool
+            enemyExplosionSynth.connect(panner);
+            enemyExplosionNoise.connect(panner);
+
+            enemyExplosionSynth.triggerAttackRelease("C2", "8n");
+            enemyExplosionNoise.triggerAttackRelease("4n");
+
+            setTimeout(() => {
+                enemyExplosionSynth.disconnect(panner);
+                enemyExplosionNoise.disconnect(panner);
+                pannerPool.push(panner);
+            }, 500); // Cleanup after 500ms
+        }
+
+        // --- Gemini API Integration ---
+        const API_KEY = ""; // Leave blank
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+
+        async function fetchWithExponentialBackoff(url, payload, maxRetries = 5) {
+            let delay = 1000;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) return response.json();
+                } catch (error) {
+                    // Network or other fetch error
+                }
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+            }
+            throw new Error("API request failed after multiple retries.");
+        }
+
+        async function generateMission() {
+            missionBriefingEl.innerHTML = '<div class="loader"></div>';
+            const prompt = "Generate a short, exciting, one-paragraph mission briefing for a retro arcade space shooter game. The mission should have a clear objective, like protecting something, destroying a specific enemy faction, or clearing a dangerous sector. Give the enemy faction a cool, pulpy sci-fi name. Keep it under 50 words.";
+            try {
+                const result = await fetchWithExponentialBackoff(API_URL, { contents: [{ parts: [{ text: prompt }] }] });
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                missionBriefingEl.textContent = text || "Mission: Destroy all hostiles. Good luck, pilot.";
+            } catch (error) {
+                missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+            }
+        }
+
+        async function generateReport(finalScore) {
+            highScoreDisplay.style.display = 'none'; // Hide scores to show report
+            reportButton.disabled = true;
+            afterActionReportContainer.style.display = 'block';
+            afterActionReportEl.innerHTML = '<div class="loader"></div>';
+            const prompt = `Write a heroic after-action report for a space fighter pilot. Their final score was ${finalScore}. Describe their bravery and skill. If the score is low (under 2000), make it a bit funny, like they survived by luck. If the score is high (over 10000), describe them as a legendary ace. Keep it to a short paragraph.`;
+            try {
+                const result = await fetchWithExponentialBackoff(API_URL, { contents: [{ parts: [{ text: prompt }] }] });
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                afterActionReportEl.textContent = text || "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
+                reportButton.style.display = 'none'; // Hide button on success
+            } catch (error) {
+                afterActionReportEl.textContent = "Error generating report. Please check your connection and try again.";
+                reportButton.disabled = false; // Re-enable on error
+            }
+        }
+
         // --- High Score Management ---
         const HIGH_SCORES_KEY = 'asteroidBlasterHighScores';
-        function loadHighScores() {
-            const scores = localStorage.getItem(HIGH_SCORES_KEY);
-            return scores ? JSON.parse(scores) : [];
-        }
-        function saveHighScores(scores) {
-            localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(scores));
-        }
-        function addHighScore(name, score) {
-            const scores = loadHighScores();
-            scores.push({ name, score });
-            scores.sort((a, b) => b.score - a.score);
-            const top10 = scores.slice(0, 10);
-            saveHighScores(top10);
-        }
+        function loadHighScores() { return JSON.parse(localStorage.getItem(HIGH_SCORES_KEY) || '[]'); }
+        function saveHighScores(scores) { localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(scores)); }
+        function addHighScore(name, score) { const scores = loadHighScores(); scores.push({ name, score }); scores.sort((a, b) => b.score - a.score); saveHighScores(scores.slice(0, 10)); }
         function displayHighScores() {
-            highScoreForm.style.display = 'none';
-            modalScoreEl.style.display = 'none';
+            gameOverContent.style.display = 'none';
+            afterActionReportContainer.style.display = 'none';
             highScoreDisplay.style.display = 'block';
             highScoreList.innerHTML = '';
             const scores = loadHighScores();
-            if (scores.length === 0) {
-                highScoreList.innerHTML = '<li>No scores yet!</li>';
-                return;
-            }
-            scores.forEach(score => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span class="score-name">${score.name}</span> <span class="score-value">${score.score}</span>`;
-                highScoreList.appendChild(li);
-            });
+            if (scores.length === 0) { highScoreList.innerHTML = '<li>No scores yet!</li>'; return; }
+            scores.forEach(score => { const li = document.createElement('li'); li.innerHTML = `<span class="score-name">${score.name}</span> <span class="score-value">${score.score}</span>`; highScoreList.appendChild(li); });
         }
 
         // --- Game Object Classes ---
-        class Star {
-            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; }
-            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
-            update() {
-                this.draw();
-                this.y += this.velocity.y;
-                if (this.y - this.radius > canvas.height) { this.y = 0 - this.radius; this.x = Math.random() * canvas.width; }
-            }
-        }
+        class Star { constructor(x, y, r, c, v) { this.x = x; this.y = y; this.radius = r; this.color = c; this.velocity = v; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); } update() { this.draw(); this.y += this.velocity.y; if (this.y - this.radius > canvas.height) { this.y = 0 - this.radius; this.x = Math.random() * canvas.width; } } }
+
         class Player {
-            constructor(x, y, radius, color) {
-                this.x = x; this.y = y; this.radius = radius; this.color = color;
-                this.velocity = { x: 0, y: 0 };
-                this.speed = 0.4; // Acceleration force
-                this.friction = 0.97; // Damping factor
+            constructor(x, y, r, c) {
+                this.x = x; this.y = y; this.radius = r; this.color = c;
+                this.velocity = { x: 0, y: 0 }; this.speed = 0.4; this.friction = 0.97;
             }
+
+            drawEngineFlame() {
+                // Only draw the flame if the player is accelerating
+                if (!keys.up && !keys.down && !keys.left && !keys.right) {
+                    return;
+                }
+
+                const flameLength = 20 + Math.random() * 10;
+                const flameWidth = this.radius * 0.8;
+                const backOfShip = -this.radius * 0.7;
+
+                // Use a gradient for a nicer flame effect
+                const grad = ctx.createLinearGradient(backOfShip, 0, backOfShip - flameLength, 0);
+                grad.addColorStop(0, `hsla(60, 100%, 50%, ${0.5 + Math.random() * 0.5})`); // Yellowish-white base
+                grad.addColorStop(1, `hsla(0, 100%, 50%, 0)`); // Fades to transparent red
+
+                ctx.beginPath();
+                ctx.moveTo(backOfShip, -flameWidth / 2); // Top corner of flame base
+                ctx.lineTo(backOfShip, flameWidth / 2);  // Bottom corner of flame base
+                ctx.lineTo(backOfShip - flameLength, 0); // Tip of the flame
+                ctx.closePath();
+
+                ctx.fillStyle = grad;
+                ctx.fill();
+            }
+
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                const angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-                ctx.rotate(angle);
+                const a = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+                ctx.rotate(a);
+
+                this.drawEngineFlame();
+
                 ctx.beginPath();
                 ctx.moveTo(this.radius, 0);
-                ctx.lineTo(-this.radius * 0.7, -this.radius * 0.8);
-                ctx.lineTo(-this.radius * 0.7, this.radius * 0.8);
+                ctx.lineTo(-this.radius * .7, -this.radius * .8);
+                ctx.lineTo(-this.radius * .7, this.radius * .8);
                 ctx.closePath();
                 ctx.fillStyle = this.color;
                 ctx.fill();
@@ -307,88 +496,146 @@
             }
             update() {
                 this.draw();
-                // Apply friction to slow down
                 this.velocity.x *= this.friction;
                 this.velocity.y *= this.friction;
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
-                if (this.x - this.radius < 0) this.x = this.radius;
-                if (this.x + this.radius > canvas.width) this.x = canvas.width - this.radius;
-                if (this.y - this.radius < 0) this.y = this.radius;
-                if (this.y + this.radius > canvas.height) this.y = canvas.height - this.radius;
-            }
-        }
-        class Projectile {
-            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; }
-            draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
-            update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; }
-        }
-        class Enemy {
-            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; this.type = Math.random() < 0.7 ? 'asteroid' : 'ship'; this.sides = Math.floor(Math.random() * 3) + 5; }
-            draw() {
-                ctx.beginPath();
-                if (this.type === 'asteroid') {
-                    ctx.moveTo(this.x + this.radius * Math.cos(0), this.y + this.radius * Math.sin(0));
-                    for (let i = 1; i <= this.sides; i++) { ctx.lineTo(this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides)); }
-                    ctx.closePath();
-                    ctx.strokeStyle = this.color; ctx.lineWidth = 3; ctx.stroke();
-                } else {
-                    ctx.moveTo(this.x, this.y - this.radius); ctx.lineTo(this.x - this.radius, this.y + this.radius); ctx.lineTo(this.x + this.radius, this.y + this.radius);
-                    ctx.closePath(); ctx.fillStyle = this.color; ctx.fill();
+
+                // Screen wrapping logic
+                if (this.x - this.radius > canvas.width) {
+                    this.x = 0 - this.radius;
+                } else if (this.x + this.radius < 0) {
+                    this.x = canvas.width + this.radius;
+                }
+                if (this.y - this.radius > canvas.height) {
+                    this.y = 0 - this.radius;
+                } else if (this.y + this.radius < 0) {
+                    this.y = canvas.height + this.radius;
                 }
             }
-            update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; }
         }
-        class Particle {
-            constructor(x, y, radius, color, velocity) { this.x = x; this.y = y; this.radius = radius; this.color = color; this.velocity = velocity; this.alpha = 1; }
-            draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); ctx.restore(); }
-            update() { this.draw(); this.velocity.x *= 0.99; this.velocity.y *= 0.99; this.x += this.velocity.x; this.y += this.velocity.y; this.alpha -= 0.01; }
-        }
+        class Projectile { constructor(x, y, r, c, v) { this.x = x; this.y = y; this.radius = r; this.color = c; this.velocity = v; } draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); } update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; } }
+        class Enemy { constructor(x, y, r, c, v) { this.x = x; this.y = y; this.radius = r; this.color = c; this.velocity = v; this.type = Math.random() < .7 ? 'asteroid' : 'ship'; this.sides = Math.floor(Math.random() * 3) + 5; } draw() { ctx.beginPath(); if (this.type === 'asteroid') { ctx.moveTo(this.x + this.radius * Math.cos(0), this.y + this.radius * Math.sin(0)); for (let i = 1; i <= this.sides; i++) { ctx.lineTo(this.x + this.radius * Math.cos(i * 2 * Math.PI / this.sides), this.y + this.radius * Math.sin(i * 2 * Math.PI / this.sides)); } ctx.closePath(); ctx.strokeStyle = this.color; ctx.lineWidth = 3; ctx.stroke(); } else { ctx.moveTo(this.x, this.y - this.radius); ctx.lineTo(this.x - this.radius, this.y + this.radius); ctx.lineTo(this.x + this.radius, this.y + this.radius); ctx.closePath(); ctx.fillStyle = this.color; ctx.fill(); } } update() { this.draw(); this.x += this.velocity.x; this.y += this.velocity.y; } }
+        class Particle { constructor(x, y, r, c, v) { this.x = x; this.y = y; this.radius = r; this.color = c; this.velocity = v; this.alpha = 1; } draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); ctx.restore(); } update() { this.draw(); this.velocity.x *= .99; this.velocity.y *= .99; this.x += this.velocity.x; this.y += this.velocity.y; this.alpha -= .01; } }
 
         // --- Game State & Initialization ---
         let player, projectiles, enemies, particles, stars, enemySpawnInterval;
-        function init() {
-            gameActive = true;
-            score = 0;
-            scoreEl.innerHTML = score;
-            uiContainer.style.display = 'block';
-            modal.style.display = 'none';
-            player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white');
-            projectiles = []; enemies = []; particles = []; stars = [];
-            for (let i = 0; i < 100; i++) {
-                const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height;
-                const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`;
-                stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 }));
-            }
-            spawnEnemies();
-        }
+        function init() { gameActive = true; score = 0; scoreEl.innerHTML = score; uiContainer.style.display = 'block'; modal.style.display = 'none'; player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white'); projectiles = []; enemies = []; particles = []; stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } spawnEnemies(); }
         function spawnEnemies() {
             if (enemySpawnInterval) clearInterval(enemySpawnInterval);
             enemySpawnInterval = setInterval(() => {
                 if (!gameActive) return;
-                const r = Math.random() * (30 - 10) + 10;
+                const radius = Math.random() * (30 - 10) + 10;
+                const spawnMargin = 30; // Safe distance for player wrap-around
                 let x, y;
-                if (Math.random() < 0.5) { x = Math.random() < 0.5 ? 0 - r : canvas.width + r; y = Math.random() * canvas.height; } else { x = Math.random() * canvas.width; y = Math.random() < 0.5 ? 0 - r : canvas.height + r; }
+                if (Math.random() < 0.5) {
+                    x = Math.random() < 0.5 ? 0 - radius - spawnMargin : canvas.width + radius + spawnMargin;
+                    y = Math.random() * canvas.height;
+                } else {
+                    x = Math.random() * canvas.width;
+                    y = Math.random() < 0.5 ? 0 - radius - spawnMargin : canvas.height + radius + spawnMargin;
+                }
                 const angle = Math.atan2(player.y - y, player.x - x);
                 const speed = 1 + (score / 500);
                 const vel = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
-                enemies.push(new Enemy(x, y, r, `hsl(${Math.random() * 360}, 50%, 50%)`, vel));
+                enemies.push(new Enemy(x, y, radius, `hsl(${Math.random() * 360}, 50%, 50%)`, vel));
             }, 1000);
         }
+
+        function showStartScreen() {
+            modal.style.display = 'flex';
+            modalTitleEl.textContent = "ASTEROID BLASTER";
+            startButton.textContent = "Start Game";
+            startButton.disabled = false;
+            missionBriefingContainer.style.display = 'block';
+            gameOverContent.style.display = 'none';
+            highScoreDisplay.style.display = 'none';
+            afterActionReportContainer.style.display = 'none';
+            reportButton.style.display = 'none';
+            highScoreButton.style.display = 'none';
+            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
+            generateMission();
+        }
+
+        function showEndModal() {
+            modal.style.display = 'flex';
+            modalTitleEl.textContent = "Game Over";
+
+            missionBriefingContainer.style.display = 'none';
+            highScoreDisplay.style.display = 'none';
+            afterActionReportContainer.style.display = 'none';
+
+            gameOverContent.style.display = 'block';
+            modalScoreEl.style.display = 'block';
+            modalScoreEl.innerHTML = `Final Score: ${score}`;
+            highScoreForm.style.display = 'block';
+
+            reportButton.style.display = 'inline-block';
+            reportButton.disabled = false;
+            highScoreButton.style.display = 'inline-block';
+
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                displayHighScores();
+                highScoreForm.style.display = 'none';
+                reportButton.style.display = 'none';
+                highScoreButton.style.display = 'none';
+            }, 30000);
+
+            // Disable restart button and start countdown
+            startButton.disabled = true;
+            let countdown = 10;
+            startButton.textContent = `Restart (${countdown})`;
+            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
+            restartCountdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    startButton.textContent = `Restart (${countdown})`;
+                } else {
+                    clearInterval(restartCountdownInterval);
+                    startButton.disabled = false;
+                    startButton.textContent = 'Restart Game';
+                }
+            }, 1000);
+        }
+
         function endGame() {
             if (!gameActive) return;
             gameActive = false;
             cancelAnimationFrame(animationId);
+
+            drawFinalFrame(); // Manually render the last frame
+
+            playPlayerDeathSound();
             clearInterval(enemySpawnInterval);
-            modal.style.display = 'flex';
-            modalScoreEl.style.display = 'block';
-            modalScoreEl.innerHTML = `Final Score: ${score}`;
-            highScoreForm.style.display = 'block';
-            highScoreDisplay.style.display = 'none';
-            modalTitleEl.textContent = "Game Over";
-            startButton.textContent = "Restart Game";
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(displayHighScores, 30000); // 30 seconds
+
+            gameOverOverlay.style.display = 'block';
+            gsap.to(gameOverOverlay, {
+                scale: 1,
+                opacity: 1,
+                duration: 1.5,
+                ease: 'elastic.out(1, 0.5)'
+            });
+
+            setTimeout(() => {
+                gsap.to(gameOverOverlay, {
+                    opacity: 0,
+                    duration: 0.5,
+                    onComplete: () => {
+                        gameOverOverlay.style.display = 'none';
+                    }
+                });
+                showEndModal();
+            }, 3000);
+        }
+
+        function drawFinalFrame() {
+            ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => s.draw());
+            particles.forEach(p => p.draw());
+            enemies.forEach(e => e.draw());
+            projectiles.forEach(p => p.draw());
+            player.draw();
         }
 
         // --- Animation Loop ---
@@ -397,100 +644,70 @@
             animationId = requestAnimationFrame(animate);
             ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             stars.forEach(s => s.update());
-            handleMovement(); player.update();
+            handleMovement();
+            player.update();
             particles.forEach((p, i) => { if (p.alpha <= 0) { particles.splice(i, 1); } else { p.update(); } });
-            projectiles.forEach((p, i) => {
-                p.update();
-                if (p.x + p.radius < 0 || p.x - p.radius > canvas.width || p.y + p.radius < 0 || p.y - p.radius > canvas.height) { setTimeout(() => { projectiles.splice(i, 1); }, 0); }
-            });
-            enemies.forEach((enemy, eIndex) => {
-                enemy.update();
-                if (Math.hypot(player.x - enemy.x, player.y - enemy.y) - enemy.radius - player.radius < 1) { playPlayerDeathSound(); endGame(); }
-                projectiles.forEach((projectile, pIndex) => {
-                    if (Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y) - enemy.radius - projectile.radius < 1) {
-                        for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); }
-                        playExplosionSound();
-                        if (enemy.radius - 10 > 10) {
-                            score += 100; scoreEl.innerHTML = score;
-                            gsap.to(enemy, { radius: enemy.radius - 10 });
-                            setTimeout(() => { projectiles.splice(pIndex, 1); }, 0);
-                        } else {
-                            score += 250; scoreEl.innerHTML = score;
-                            setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0);
-                        }
-                    }
-                });
-            });
+            projectiles.forEach((p, i) => { p.update(); if (p.x + p.radius < 0 || p.x - p.radius > canvas.width || p.y + p.radius < 0 || p.y - p.radius > canvas.height) { setTimeout(() => { projectiles.splice(i, 1); }, 0); } });
+            enemies.forEach((enemy, eIndex) => { enemy.update(); if (Math.hypot(player.x - enemy.x, player.y - enemy.y) - enemy.radius - player.radius < 1) { endGame(); } projectiles.forEach((projectile, pIndex) => { if (Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y) - enemy.radius - projectile.radius < 1) { for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); } playExplosionSound(projectile.x, projectile.y); if (enemy.radius - 10 > 10) { score += 100; scoreEl.innerHTML = score; gsap.to(enemy, { radius: enemy.radius - 10 }); setTimeout(() => { projectiles.splice(pIndex, 1); }, 0); } else { score += 250; scoreEl.innerHTML = score; setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0); } } }); });
         }
 
         // --- Event Listeners & Controls ---
         const keys = { up: false, down: false, left: false, right: false };
-        function handleMovement() {
-            if (!player) return;
-            if (keys.up) player.velocity.y -= player.speed;
-            if (keys.down) player.velocity.y += player.speed;
-            if (keys.left) player.velocity.x -= player.speed;
-            if (keys.right) player.velocity.x += player.speed;
-        }
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && gameActive) endGame();
-            switch (e.key.toLowerCase()) {
-                case 'arrowup': case 'w': keys.up = true; break;
-                case 'arrowdown': case 's': keys.down = true; break;
-                case 'arrowleft': case 'a': keys.left = true; break;
-                case 'arrowright': case 'd': keys.right = true; break;
-            }
-            if (e.code === 'Space' && gameActive) shootProjectile();
-        });
-        window.addEventListener('keyup', (e) => {
-            switch (e.key.toLowerCase()) {
-                case 'arrowup': case 'w': keys.up = false; break;
-                case 'arrowdown': case 's': keys.down = false; break;
-                case 'arrowleft': case 'a': keys.left = false; break;
-                case 'arrowright': case 'd': keys.right = false; break;
-            }
-        });
+        function handleMovement() { if (!player) return; if (keys.up) player.velocity.y -= player.speed; if (keys.down) player.velocity.y += player.speed; if (keys.left) player.velocity.x -= player.speed; if (keys.right) player.velocity.x += player.speed; }
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && gameActive) endGame(); switch (e.key.toLowerCase()) { case 'arrowup': case 'w': keys.up = true; break; case 'arrowdown': case 's': keys.down = true; break; case 'arrowleft': case 'a': keys.left = true; break; case 'arrowright': case 'd': keys.right = true; break; } if (e.code === 'Space' && gameActive) shootProjectile(); });
+        window.addEventListener('keyup', (e) => { switch (e.key.toLowerCase()) { case 'arrowup': case 'w': keys.up = false; break; case 'arrowdown': case 's': keys.down = false; break; case 'arrowleft': case 'a': keys.left = false; break; case 'arrowright': case 'd': keys.right = false; break; } });
         window.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; });
-        function shootProjectile() {
-            if (!player) return;
-            playShootSound();
-            const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x);
-            projectiles.push(new Projectile(player.x, player.y, 5, '#0ff', { x: Math.cos(angle) * 10, y: Math.sin(angle) * 10 }));
-        }
-        canvas.addEventListener('click', () => { if (gameActive) shootProjectile(); });
-        startButton.addEventListener('click', () => {
+
+        // Prevent default browser drag behavior on the canvas
+        canvas.addEventListener('mousedown', (e) => { e.preventDefault(); });
+
+        function shootProjectile() { if (!player) return; playShootSound(); const angle = Math.atan2(mouse.y - player.y, mouse.x - player.x); projectiles.push(new Projectile(player.x, player.y, 5, '#0ff', { x: Math.cos(angle) * 10, y: Math.sin(angle) * 10 })); }
+
+        canvas.addEventListener('click', async () => {
+            await startAudio();
+            if (gameActive) shootProjectile();
+        });
+
+        startButton.addEventListener('click', async () => {
+            await startAudio();
             clearTimeout(inactivityTimer);
+            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
             playStartGameSound();
             setTimeout(() => { init(); animate(); }, 100);
         });
-        saveScoreButton.addEventListener('click', () => {
+
+        saveScoreButton.addEventListener('click', async () => {
+            await startAudio();
             const name = playerNameInput.value.trim();
             if (name) {
                 addHighScore(name, score);
                 highScoreForm.style.display = 'none';
-                displayHighScores();
             }
         });
 
+        playerNameInput.addEventListener('input', () => {
+            clearTimeout(inactivityTimer);
+        });
+
+        reportButton.addEventListener('click', async () => {
+            await startAudio();
+            generateReport(score);
+        });
+
+        highScoreButton.addEventListener('click', async () => {
+            await startAudio();
+            clearTimeout(inactivityTimer);
+            gameOverContent.style.display = 'none';
+            reportButton.style.display = 'none';
+            highScoreButton.style.display = 'none';
+            displayHighScores();
+        });
+
         // --- Window Resizing & Initial Setup ---
-        function resizeCanvas() {
-            const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800);
-            canvas.width = size; canvas.height = size;
-            if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; }
-            if (gameActive || !stars) {
-                stars = [];
-                for (let i = 0; i < 100; i++) {
-                    const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height;
-                    const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`;
-                    stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 }));
-                }
-            }
-        }
+        function resizeCanvas() { const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800); canvas.width = size; canvas.height = size; if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; } if (gameActive || !stars) { stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } } }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        modalScoreEl.style.display = 'none';
-        highScoreForm.style.display = 'none';
-        highScoreDisplay.style.display = 'none';
+        showStartScreen();
         const gsapScript = document.createElement('script');
         gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
         document.head.appendChild(gsapScript);
