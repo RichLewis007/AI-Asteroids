@@ -12,7 +12,7 @@
   
 > <div align="left">
 >   <div>
->     <p><strong>Legal disclaimer:</strong> These graphics are in no way intended to represent actual in-game graphics. In fact, they are meant to be **deceiving**, just as the original game packaging on contemporaneous retro games deceived millions of innocent children into buying games like Asteroids™. You have been warned.</p>
+>     <p><strong>Legal disclaimer:</strong> These graphics are in no way intended to represent actual in-game graphics. In fact, they are meant to be <strong>deceiving</strong>, just as the original game packaging on contemporaneous retro games deceived millions of innocent children into buying games like Asteroids™. You have been warned.</p>
 >   </div>
 > </div>
 
