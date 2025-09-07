@@ -1,5 +1,4 @@
 # AI Asteroids
-by Rich Lewis
 
 ![License](https://img.shields.io/badge/license-mit-blue.svg)
 <!-- ![GitHub issues](https://img.shields.io/github/issues/RichLewis007/asteroid-blaster)
