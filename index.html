@@ -406,6 +406,14 @@
         }
 
         async function generateMission() {
+            // Check if API key is configured
+            if (!API_KEY || API_KEY.trim() === "") {
+                // No API key - show fallback mission briefing immediately
+                missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+                return;
+            }
+
+            // API key is configured - show loader and try to generate mission
             missionBriefingEl.innerHTML = '<div class="loader"></div>';
             const prompt = "Generate a short, exciting, one-paragraph mission briefing for a retro arcade space shooter game. The mission should have a clear objective, like protecting something, destroying a specific enemy faction, or clearing a dangerous sector. Give the enemy faction a cool, pulpy sci-fi name. Keep it under 50 words.";
             try {
@@ -421,6 +429,16 @@
             highScoreDisplay.style.display = 'none'; // Hide scores to show report
             reportButton.disabled = true;
             afterActionReportContainer.style.display = 'block';
+            
+            // Check if API key is configured
+            if (!API_KEY || API_KEY.trim() === "") {
+                // No API key - show fallback report immediately
+                afterActionReportEl.textContent = "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
+                reportButton.style.display = 'none'; // Hide button since we're done
+                return;
+            }
+
+            // API key is configured - show loader and try to generate report
             afterActionReportEl.innerHTML = '<div class="loader"></div>';
             const prompt = `Write a heroic after-action report for a space fighter pilot. Their final score was ${finalScore}. Describe their bravery and skill. If the score is low (under 2000), make it a bit funny, like they survived by luck. If the score is high (over 10000), describe them as a legendary ace. Keep it to a short paragraph.`;
             try {
