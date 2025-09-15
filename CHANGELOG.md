@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - CHANGELOG.md file to track project changes
-- Exit button (🚪) to open https://RichLewis007.com in new tab
+- Exit button (🚪) to navigate to https://RichLewis007.com
 - Immediate fallback text display when no API key is configured
 
 ### Changed
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mission briefing now shows fallback text immediately when no API key is set
 - After-action reports now show fallback text immediately when no API key is set
 - Improved UX by eliminating unnecessary loading spinners for users without API key
+- Exit button now navigates to https://RichLewis007.com in same window instead of new tab
 
 ### Security
 - Removed private email address from git history and public repository
