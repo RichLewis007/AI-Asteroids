@@ -1,6 +1,6 @@
 {
   "name": "ai-asteroids",
-  "version": "2.0.0",
+  "version": "v.004",
   "description": "AI-powered Asteroids game with dynamic mission briefings and after-action reports",
   "main": "index.html",
   "scripts": {

@@ -34,8 +34,8 @@ When you create a new git tag, GitHub Actions automatically updates the version:
 
 ```bash
 # Create a new version tag
-git tag v.003
-git push origin v.003
+git tag v.004
+git push origin v.004
 ```
 
 The GitHub Actions workflow will automatically:
