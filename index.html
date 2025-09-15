@@ -87,6 +87,41 @@
             /* So it doesn't block clicks */
             display: none;
             /* Start hidden */
+            transition: all 0.3s ease-out;
+        }
+
+        #game-over-overlay.show {
+            animation: gameOverAnimation 1.5s ease-out forwards;
+        }
+
+        @keyframes gameOverAnimation {
+            0% {
+                transform: scale(3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #game-over-overlay.fade-out {
+            animation: fadeOutAnimation 0.5s ease-in forwards;
+        }
+
+        @keyframes fadeOutAnimation {
+            from {
+                transform: scale(1);
+                opacity: 1;
+            }
+            to {
+                transform: scale(1);
+                opacity: 0;
+            }
         }
 
         #modal h1 {
@@ -636,21 +671,23 @@
             clearInterval(enemySpawnInterval);
 
             gameOverOverlay.style.display = 'block';
-            if (window.gsap) {
-                gsap.to(gameOverOverlay, { scale: 1, opacity: 1, duration: 1.5, ease: 'elastic.out(1, 0.5)' });
+            // Reset any previous animation classes
+            gameOverOverlay.classList.remove('show', 'fade-out');
+            
+            // Start the animation after a brief delay to ensure display is set
+            setTimeout(() => {
+                gameOverOverlay.classList.add('show');
+                
+                // After animation completes, fade out and show modal
                 setTimeout(() => {
-                    gsap.to(gameOverOverlay, { opacity: 0, duration: 0.5, onComplete: () => { gameOverOverlay.style.display = 'none'; } });
-                    showEndModal();
-                }, 3000);
-            } else {
-                gameOverOverlay.style.opacity = '1';
-                gameOverOverlay.style.transform = 'scale(1)';
-                setTimeout(() => {
-                    gameOverOverlay.style.opacity = '0';
-                    setTimeout(() => { gameOverOverlay.style.display = 'none'; }, 500);
-                    showEndModal();
-                }, 3000);
-            }
+                    gameOverOverlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        gameOverOverlay.style.display = 'none';
+                        gameOverOverlay.classList.remove('show', 'fade-out');
+                        showEndModal();
+                    }, 500); // Match fadeOutAnimation duration
+                }, 2000); // Show for 2 seconds after animation
+            }, 10);
         }
 
         function drawFinalFrame() {
