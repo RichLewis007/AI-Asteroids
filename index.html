@@ -305,7 +305,7 @@
         const afterActionReportContainer = document.getElementById('after-action-report-container');
         const afterActionReportEl = document.getElementById('after-action-report');
 
-        let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false, restartCountdownInterval;
+        let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         let canvasRect = null;
 
@@ -552,7 +552,6 @@
             afterActionReportContainer.style.display = 'none';
             reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
-            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
             generateMission();
         }
 
@@ -581,21 +580,9 @@
                 highScoreButton.style.display = 'none';
             }, 30000);
 
-            // Disable restart button and start countdown
-            startButton.disabled = true;
-            let countdown = 10;
-            startButton.textContent = `Restart (${countdown})`;
-            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
-            restartCountdownInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    startButton.textContent = `Restart (${countdown})`;
-                } else {
-                    clearInterval(restartCountdownInterval);
-                    startButton.disabled = false;
-                    startButton.textContent = 'Restart Game';
-                }
-            }, 1000);
+            // Enable restart button immediately
+            startButton.disabled = false;
+            startButton.textContent = 'Restart Game';
         }
 
         function endGame() {
@@ -681,7 +668,6 @@
         startButton.addEventListener('click', async () => {
             await startAudio();
             clearTimeout(inactivityTimer);
-            if (restartCountdownInterval) clearInterval(restartCountdownInterval);
             playStartGameSound();
             setTimeout(() => { init(); animate(); }, 100);
         });
