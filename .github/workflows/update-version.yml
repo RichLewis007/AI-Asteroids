@@ -12,7 +12,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0  # Fetch all history for proper git operations
+        
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -24,6 +27,9 @@ jobs:
         TAG_NAME=${GITHUB_REF#refs/tags/}
         echo "Updating version to: $TAG_NAME"
         
+        # Checkout main branch explicitly
+        git checkout main
+        
         # Update the version in index.html
         sed -i "s/const fallbackVersion = \"[^\"]*\";/const fallbackVersion = \"$TAG_NAME\";/" index.html
         
@@ -33,4 +39,4 @@ jobs:
         git config --local user.name "GitHub Action"
         git add index.html
         git commit -m "Auto-update version to $TAG_NAME" || exit 0
-        git push
+        git push origin main

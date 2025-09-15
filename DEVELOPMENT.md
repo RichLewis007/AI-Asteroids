@@ -146,6 +146,8 @@ The game is automatically deployed to GitHub Pages:
 - Check git tags: `git tag -l`
 - Run update script: `node update-version.js`
 - Verify GitHub Actions workflow is enabled
+- Check GitHub Actions logs for errors
+- Ensure the workflow has proper permissions to push to main branch
 
 **AI features not working**
 - Check API key is configured
