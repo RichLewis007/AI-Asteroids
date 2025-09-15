@@ -20,7 +20,7 @@
 ![AI Asteroids Banner](./assets/ai-asteroids-features.png)  -->
 
 ## Try it here!
-[Play AI-Asteroids in your web browser](https://ai-asteroids.richlewis007.com/)\
+[Play AI-Asteroids in your web browser](https://ai-asteroids.richlewis007.com/)
 
 > **Note:** AI features are **disabled** in this public web version to prevent triggering billing on the developer's Gemini API key. 
 
