@@ -66,6 +66,16 @@
             max-width: 600px;
         }
 
+        #version-display {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #0ff;
+            opacity: 0.7;
+            text-shadow: 1px 1px 2px #000;
+        }
+
         #game-over-overlay {
             position: absolute;
             color: #ff4444;
@@ -251,6 +261,7 @@
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
         <div id="modal">
+            <div id="version-display">v.002</div>
             <h1 id="modal-title">AI ASTEROIDS</h1>
             <div id="modal-content">
                 <!-- Game Over Content -->

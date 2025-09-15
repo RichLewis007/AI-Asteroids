@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CHANGELOG.md file to track project changes
 - Exit button (🚪) to navigate to https://RichLewis007.com
 - Immediate fallback text display when no API key is configured
+- Version number display (v.002) shown in top-right corner of all menus
 
 ### Changed
 - Removed 10-second countdown timer that prevented immediate game restart after game over
