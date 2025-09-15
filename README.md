@@ -19,10 +19,15 @@
 <!-- ![AI Asteroids Banner](./assets/ai-asteroids-banner.png)
 ![AI Asteroids Banner](./assets/ai-asteroids-features.png)  -->
 
+## Try it here!
+[Play AI-Asteroids in your web browser](https://ai-asteroids.richlewis007.com/)\
+
+> **Note:** AI features are **disabled** in this public web version to prevent triggering billing on the developer's Gemini API key. 
+
 ## Description
-Fly through space in your web browser, shooting asteroids and bad guys!
-A very simple in-browser game. Simple graphics. Simple sound. But cool AI!
-All code in the 1 html file.
+- Fly through space in your web browser, shooting asteroids and bad guys!
+- A very simple in-browser game. Simple graphics. Simple sound. But cool AI!
+- All code in the 1 html file.
 
 ## Features
 - Control your ship using the keyboard or mouse, but in a different way from the traditional "Asteroids" games. Uee the WASD or cursor keys to move the spaceship, and use the mouse to aim the ship's blaster. Press space or left click to shoot where the mouse pointer is aiming. I think this is a better way to control the ship than the old, keyboard-only setup. Do you?
