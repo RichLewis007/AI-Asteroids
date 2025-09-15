@@ -144,6 +144,14 @@
             box-shadow: 0 0 20px #ff9800;
         }
 
+        #exit-button {
+            background: linear-gradient(45deg, #f44336, #e91e63);
+        }
+
+        #exit-button:hover:not(:disabled) {
+            box-shadow: 0 0 20px #e91e63;
+        }
+
         /* High Score & AI Styles */
         #high-score-form {
             margin-top: 10px;
@@ -275,6 +283,7 @@
                 <button id="start-button" class="action-button">Start Game</button>
                 <button id="report-button" class="action-button" style="display:none;">✨ Generate Report</button>
                 <button id="high-score-button" class="action-button" style="display:none;">🏆 High Scores</button>
+                <button id="exit-button" class="action-button">🚪 Exit</button>
             </div>
         </div>
     </div>
@@ -293,6 +302,7 @@
         const startButton = document.getElementById('start-button');
         const reportButton = document.getElementById('report-button');
         const highScoreButton = document.getElementById('high-score-button');
+        const exitButton = document.getElementById('exit-button');
         const buttonContainer = document.getElementById('button-container');
         const highScoreForm = document.getElementById('high-score-form');
         const playerNameInput = document.getElementById('player-name-input');
@@ -697,6 +707,10 @@
             reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
             displayHighScores();
+        });
+
+        exitButton.addEventListener('click', () => {
+            window.open('https://RichLewis007.com', '_blank');
         });
 
         // --- Window Resizing & Initial Setup ---
