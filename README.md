@@ -97,5 +97,12 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and release notes.
 Pull requests are welcome. For major changes, please open an issue first
 to discuss what you would like to change.
 
+## For Developers
+If you're interested in contributing to the codebase or understanding how the project works, see [DEVELOPMENT.md](DEVELOPMENT.md) for detailed technical documentation including:
+- Version management and automation
+- Development setup and workflow
+- Code architecture and features
+- Deployment processes
+
 ## License
 This project is licensed under the terms of the MIT license.
