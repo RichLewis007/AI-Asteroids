@@ -66,6 +66,16 @@
             max-width: 600px;
         }
 
+        #version-display {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 12px;
+            color: #0ff;
+            opacity: 0.7;
+            text-shadow: 1px 1px 2px #000;
+        }
+
         #game-over-overlay {
             position: absolute;
             color: #ff4444;
@@ -251,6 +261,7 @@
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
         <div id="modal">
+            <div id="version-display">Loading...</div>
             <h1 id="modal-title">AI ASTEROIDS</h1>
             <div id="modal-content">
                 <!-- Game Over Content -->
@@ -303,6 +314,7 @@
         const reportButton = document.getElementById('report-button');
         const highScoreButton = document.getElementById('high-score-button');
         const exitButton = document.getElementById('exit-button');
+        const versionDisplay = document.getElementById('version-display');
         const buttonContainer = document.getElementById('button-container');
         const highScoreForm = document.getElementById('high-score-form');
         const playerNameInput = document.getElementById('player-name-input');
@@ -733,9 +745,20 @@
 
         // --- Window Resizing & Initial Setup ---
         function resizeCanvas() { const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800); canvas.width = size; canvas.height = size; if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; } if (gameActive || !stars) { stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } } canvasRect = canvas.getBoundingClientRect(); }
+        // --- Version Management ---
+        function updateVersionDisplay() {
+            // Try to get version from git tags via API, fallback to hardcoded version
+            const fallbackVersion = "v.002";
+            
+            // For now, use the fallback version
+            // In the future, this could fetch from GitHub API or be set during build
+            versionDisplay.textContent = fallbackVersion;
+        }
+
         window.addEventListener('resize', resizeCanvas);
         window.addEventListener('scroll', () => { canvasRect = canvas.getBoundingClientRect(); }, { passive: true });
         resizeCanvas();
+        updateVersionDisplay();
         showStartScreen();
     </script>
 </body>

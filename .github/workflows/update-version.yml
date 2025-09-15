@@ -1,0 +1,36 @@
+name: Update Version on Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Update version in index.html
+      run: |
+        # Get the tag name (without refs/tags/ prefix)
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        echo "Updating version to: $TAG_NAME"
+        
+        # Update the version in index.html
+        sed -i "s/const fallbackVersion = \"[^\"]*\";/const fallbackVersion = \"$TAG_NAME\";/" index.html
+        
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add index.html
+        git commit -m "Auto-update version to $TAG_NAME" || exit 0
+        git push

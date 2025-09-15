@@ -1,0 +1,19 @@
+{
+  "name": "ai-asteroids",
+  "version": "2.0.0",
+  "description": "AI-powered Asteroids game with dynamic mission briefings and after-action reports",
+  "main": "index.html",
+  "scripts": {
+    "update-version": "node update-version.js",
+    "build": "npm run update-version",
+    "release": "npm run build && git add . && git commit -m 'Update version' && git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RichLewis007/AI-Asteroids.git"
+  },
+  "keywords": ["asteroids", "game", "ai", "retro", "arcade"],
+  "author": "Rich Lewis",
+  "license": "MIT",
+  "homepage": "https://ai-asteroids.richlewis007.com"
+}
