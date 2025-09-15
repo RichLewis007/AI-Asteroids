@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved UX by eliminating unnecessary loading spinners for users without API key
 - Exit button now navigates to https://RichLewis007.com in same window instead of new tab
 
+### Fixed
+- Game over animation now plays consistently every time player dies
+- Replaced unreliable GSAP dependency with pure CSS animations
+- Fixed timing issues that prevented game over animation from showing
+
 ### Security
 - Removed private email address from git history and public repository
 
