@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - CHANGELOG.md file to track project changes
+- Exit button (🚪) to open https://RichLewis007.com in new tab
+- Immediate fallback text display when no API key is configured
 
 ### Changed
 - Removed 10-second countdown timer that prevented immediate game restart after game over
 - Cleaned up restart button logic for better user experience
+- Mission briefing now shows fallback text immediately when no API key is set
+- After-action reports now show fallback text immediately when no API key is set
+- Improved UX by eliminating unnecessary loading spinners for users without API key
 
 ### Security
 - Removed private email address from git history and public repository
