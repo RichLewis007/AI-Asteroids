@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Asteroids</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
@@ -35,6 +38,7 @@
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
             cursor: crosshair;
+            touch-action: none;
         }
 
         #ui-container {
@@ -303,74 +307,69 @@
 
         let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false, restartCountdownInterval;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        let canvasRect = null;
 
-        // --- Audio Initialization ---
+        // --- Audio Initialization (lazy-load Tone.js) ---
+        let toneLibraryLoadPromise;
+        let startGameSynth, shootSynth, playerBoom, playerNoise, playerWail, enemyExplosionSynth, enemyExplosionNoise;
+        const pannerPool = [];
+
         async function startAudio() {
             if (toneStarted) return;
+            if (!window.Tone) {
+                if (!toneLibraryLoadPromise) {
+                    toneLibraryLoadPromise = new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js';
+                        s.async = true;
+                        s.defer = true;
+                        s.onload = () => resolve();
+                        s.onerror = () => reject(new Error('Failed to load Tone.js'));
+                        document.head.appendChild(s);
+                    });
+                }
+                try { await toneLibraryLoadPromise; } catch (e) { return; }
+            }
             await Tone.start();
             toneStarted = true;
             // Set listener position once audio is started
             Tone.Listener.positionX.value = 0;
             Tone.Listener.positionY.value = 0;
             Tone.Listener.positionZ.value = 0;
+
+            // Initialize synths and panner pool on first start
+            if (!startGameSynth) {
+                startGameSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
+                shootSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 } }).toDestination();
+                playerBoom = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.5, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).toDestination();
+                playerBoom.volume.value = -3;
+                playerNoise = new Tone.NoiseSynth({ noise: { type: 'brown' }, envelope: { attack: 0.005, decay: 0.4, sustain: 0.1, release: 0.5 } }).toDestination();
+                playerNoise.volume.value = -5;
+                playerWail = new Tone.FMSynth({ harmonicity: 1.5, modulationIndex: 10, envelope: { attack: 0.1, decay: 0.5, sustain: 0.1, release: 1.0 }, modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.0 } }).toDestination();
+                playerWail.volume.value = -6;
+                enemyExplosionSynth = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 5, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } });
+                enemyExplosionNoise = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } });
+                enemyExplosionNoise.volume.value = -10;
+                for (let i = 0; i < 10; i++) { pannerPool.push(new Tone.Panner3D().toDestination()); }
+            }
         }
 
-        // --- Sound Synthesis with Tone.js ---
-        const startGameSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
-        function playStartGameSound() { const now = Tone.now(); startGameSynth.triggerAttackRelease("C4", "16n", now); startGameSynth.triggerAttackRelease("E4", "16n", now + 0.1); startGameSynth.triggerAttackRelease("G4", "16n", now + 0.2); startGameSynth.triggerAttackRelease("C5", "8n", now + 0.3); }
-
-        // Player-centric sounds connect directly to destination
-        const shootSynth = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 } }).toDestination();
-        function playShootSound() { shootSynth.triggerAttackRelease("G5", "32n"); }
-
-        const playerBoom = new Tone.MembraneSynth({ pitchDecay: 0.05, octaves: 10, oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.5, sustain: 0.01, release: 1.4, attackCurve: 'exponential' } }).toDestination();
-        playerBoom.volume.value = -3;
-        const playerNoise = new Tone.NoiseSynth({ noise: { type: 'brown' }, envelope: { attack: 0.005, decay: 0.4, sustain: 0.1, release: 0.5 } }).toDestination();
-        playerNoise.volume.value = -5;
-        const playerWail = new Tone.FMSynth({ harmonicity: 1.5, modulationIndex: 10, envelope: { attack: 0.1, decay: 0.5, sustain: 0.1, release: 1.0 }, modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.3, release: 1.0 } }).toDestination();
-        playerWail.volume.value = -6;
-        function playPlayerDeathSound() {
-            const now = Tone.now();
-            playerBoom.triggerAttackRelease("C1", "1n");
-            playerNoise.triggerAttackRelease("0.5n");
-            playerWail.triggerAttack("E4", now + 0.05);
-            playerWail.frequency.rampTo("C2", 0.7, now + 0.1);
-            playerWail.triggerRelease(now + 0.8);
-        }
-
-        // --- 3D Spatial Audio for Explosions ---
-        const pannerPool = [];
-        for (let i = 0; i < 10; i++) { // Create a pool of 10 panners
-            pannerPool.push(new Tone.Panner3D().toDestination());
-        }
-        // Synths for explosions do NOT connect to destination directly
-        const enemyExplosionSynth = new Tone.MembraneSynth({ pitchDecay: 0.02, octaves: 5, envelope: { attack: 0.001, decay: 0.2, sustain: 0 } });
-        const enemyExplosionNoise = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0 } });
-        enemyExplosionNoise.volume.value = -10;
+        function playStartGameSound() { if (!window.Tone || !startGameSynth) return; const now = Tone.now(); startGameSynth.triggerAttackRelease("C4", "16n", now); startGameSynth.triggerAttackRelease("E4", "16n", now + 0.1); startGameSynth.triggerAttackRelease("G4", "16n", now + 0.2); startGameSynth.triggerAttackRelease("C5", "8n", now + 0.3); }
+        function playShootSound() { if (!shootSynth) return; shootSynth.triggerAttackRelease("G5", "32n"); }
+        function playPlayerDeathSound() { if (!window.Tone || !playerBoom || !playerNoise || !playerWail) return; const now = Tone.now(); playerBoom.triggerAttackRelease("C1", "1n"); playerNoise.triggerAttackRelease("0.5n"); playerWail.triggerAttack("E4", now + 0.05); playerWail.frequency.rampTo("C2", 0.7, now + 0.1); playerWail.triggerRelease(now + 0.8); }
 
         function playExplosionSound(x, y) {
-            if (pannerPool.length === 0) return; // No available panner
+            if (!enemyExplosionSynth || !enemyExplosionNoise || pannerPool.length === 0) return;
             const panner = pannerPool.pop();
-
-            // Convert canvas coordinates to 3D audio space (-10 to 10)
             const pannerX = (x / canvas.width - 0.5) * 20;
             const pannerY = -(y / canvas.height - 0.5) * 20; // Invert Y
-
             panner.positionX.value = pannerX;
             panner.positionY.value = pannerY;
-
-            // Connect synths, play sound, then disconnect and return panner to pool
             enemyExplosionSynth.connect(panner);
             enemyExplosionNoise.connect(panner);
-
             enemyExplosionSynth.triggerAttackRelease("C2", "8n");
             enemyExplosionNoise.triggerAttackRelease("4n");
-
-            setTimeout(() => {
-                enemyExplosionSynth.disconnect(panner);
-                enemyExplosionNoise.disconnect(panner);
-                pannerPool.push(panner);
-            }, 500); // Cleanup after 500ms
+            setTimeout(() => { enemyExplosionSynth.disconnect(panner); enemyExplosionNoise.disconnect(panner); pannerPool.push(panner); }, 500);
         }
 
         // --- Gemini API Integration ---
@@ -610,23 +609,21 @@
             clearInterval(enemySpawnInterval);
 
             gameOverOverlay.style.display = 'block';
-            gsap.to(gameOverOverlay, {
-                scale: 1,
-                opacity: 1,
-                duration: 1.5,
-                ease: 'elastic.out(1, 0.5)'
-            });
-
-            setTimeout(() => {
-                gsap.to(gameOverOverlay, {
-                    opacity: 0,
-                    duration: 0.5,
-                    onComplete: () => {
-                        gameOverOverlay.style.display = 'none';
-                    }
-                });
-                showEndModal();
-            }, 3000);
+            if (window.gsap) {
+                gsap.to(gameOverOverlay, { scale: 1, opacity: 1, duration: 1.5, ease: 'elastic.out(1, 0.5)' });
+                setTimeout(() => {
+                    gsap.to(gameOverOverlay, { opacity: 0, duration: 0.5, onComplete: () => { gameOverOverlay.style.display = 'none'; } });
+                    showEndModal();
+                }, 3000);
+            } else {
+                gameOverOverlay.style.opacity = '1';
+                gameOverOverlay.style.transform = 'scale(1)';
+                setTimeout(() => {
+                    gameOverOverlay.style.opacity = '0';
+                    setTimeout(() => { gameOverOverlay.style.display = 'none'; }, 500);
+                    showEndModal();
+                }, 3000);
+            }
         }
 
         function drawFinalFrame() {
@@ -648,7 +645,20 @@
             player.update();
             particles.forEach((p, i) => { if (p.alpha <= 0) { particles.splice(i, 1); } else { p.update(); } });
             projectiles.forEach((p, i) => { p.update(); if (p.x + p.radius < 0 || p.x - p.radius > canvas.width || p.y + p.radius < 0 || p.y - p.radius > canvas.height) { setTimeout(() => { projectiles.splice(i, 1); }, 0); } });
-            enemies.forEach((enemy, eIndex) => { enemy.update(); if (Math.hypot(player.x - enemy.x, player.y - enemy.y) - enemy.radius - player.radius < 1) { endGame(); } projectiles.forEach((projectile, pIndex) => { if (Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y) - enemy.radius - projectile.radius < 1) { for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); } playExplosionSound(projectile.x, projectile.y); if (enemy.radius - 10 > 10) { score += 100; scoreEl.innerHTML = score; gsap.to(enemy, { radius: enemy.radius - 10 }); setTimeout(() => { projectiles.splice(pIndex, 1); }, 0); } else { score += 250; scoreEl.innerHTML = score; setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0); } } }); });
+            enemies.forEach((enemy, eIndex) => {
+                enemy.update();
+                const dxp = player.x - enemy.x, dyp = player.y - enemy.y; const rPlayer = enemy.radius + player.radius;
+                if ((dxp * dxp + dyp * dyp) <= rPlayer * rPlayer) { endGame(); }
+                projectiles.forEach((projectile, pIndex) => {
+                    const dx = projectile.x - enemy.x, dy = projectile.y - enemy.y; const r = enemy.radius + projectile.radius;
+                    if ((dx * dx + dy * dy) <= r * r) {
+                        for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); }
+                        playExplosionSound(projectile.x, projectile.y);
+                        if (enemy.radius - 10 > 10) { score += 100; scoreEl.innerHTML = score; if (window.gsap) { gsap.to(enemy, { radius: enemy.radius - 10 }); } else { enemy.radius = enemy.radius - 10; } setTimeout(() => { projectiles.splice(pIndex, 1); }, 0); }
+                        else { score += 250; scoreEl.innerHTML = score; setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0); }
+                    }
+                });
+            });
         }
 
         // --- Event Listeners & Controls ---
@@ -656,7 +666,7 @@
         function handleMovement() { if (!player) return; if (keys.up) player.velocity.y -= player.speed; if (keys.down) player.velocity.y += player.speed; if (keys.left) player.velocity.x -= player.speed; if (keys.right) player.velocity.x += player.speed; }
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && gameActive) endGame(); switch (e.key.toLowerCase()) { case 'arrowup': case 'w': keys.up = true; break; case 'arrowdown': case 's': keys.down = true; break; case 'arrowleft': case 'a': keys.left = true; break; case 'arrowright': case 'd': keys.right = true; break; } if (e.code === 'Space' && gameActive) shootProjectile(); });
         window.addEventListener('keyup', (e) => { switch (e.key.toLowerCase()) { case 'arrowup': case 'w': keys.up = false; break; case 'arrowdown': case 's': keys.down = false; break; case 'arrowleft': case 'a': keys.left = false; break; case 'arrowright': case 'd': keys.right = false; break; } });
-        window.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; });
+        window.addEventListener('mousemove', (e) => { const rect = canvasRect || canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; }, { passive: true });
 
         // Prevent default browser drag behavior on the canvas
         canvas.addEventListener('mousedown', (e) => { e.preventDefault(); });
@@ -704,13 +714,11 @@
         });
 
         // --- Window Resizing & Initial Setup ---
-        function resizeCanvas() { const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800); canvas.width = size; canvas.height = size; if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; } if (gameActive || !stars) { stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } } }
+        function resizeCanvas() { const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800); canvas.width = size; canvas.height = size; if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; } if (gameActive || !stars) { stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } } canvasRect = canvas.getBoundingClientRect(); }
         window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('scroll', () => { canvasRect = canvas.getBoundingClientRect(); }, { passive: true });
         resizeCanvas();
         showStartScreen();
-        const gsapScript = document.createElement('script');
-        gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js';
-        document.head.appendChild(gsapScript);
     </script>
 </body>
 
