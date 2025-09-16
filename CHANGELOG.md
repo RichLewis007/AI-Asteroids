@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved UX by eliminating unnecessary loading spinners for users without API key
 - Exit button now navigates to https://RichLewis007.com in same window instead of new tab
 
+### Changed
+- Game canvas now fills entire screen for immersive fullscreen experience
+- Removed size constraints that limited canvas to 90% of window and 800px max
+- Updated modal and overlay positioning for fullscreen layout
+
 ### Fixed
 - Game over animation now plays consistently every time player dies
 - Replaced unreliable GSAP dependency with pure CSS animations
