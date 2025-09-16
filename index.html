@@ -158,8 +158,89 @@
             width: 100%;
         }
 
+        /* After-Action Report Modal */
+        #report-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 15px;
+            padding: 20px 40px 40px 40px;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
+            z-index: 1000;
+        }
+
+        #report-modal-header {
+            margin-bottom: 10px;
+        }
+
+        #report-modal h1 {
+            font-size: 48px;
+            margin-bottom: 0;
+            margin-top: 0;
+            color: #0ff;
+        }
+
+        #report-modal-content {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 120px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #report-text-container {
+            width: 85%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #report-text {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            list-style: none;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-x: hidden;
+            overflow-y: auto;
+            word-wrap: break-word;
+            word-break: break-word;
+            font-size: 20px;
+            text-align: left;
+            max-height: none;
+            min-height: 0;
+        }
+
+        #report-button-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+        }
+
         #mission-briefing-container {
-            width: 70%;
+            width: 85%;
             height: 90%;
             display: flex;
             flex-direction: column;
@@ -367,18 +448,21 @@
             text-align: center;
             color: #0ff;
             padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
         }
 
         #mission-tech-title {
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 15px;
             text-shadow: 0 0 10px #0ff;
             animation: pulse 2s ease-in-out infinite;
         }
 
         #mission-tech-subtitle {
-            font-size: 10px;
-            margin-bottom: 20px;
+            font-size: 14px;
+            margin-bottom: 25px;
             color: #88f;
             opacity: 0.8;
         }
@@ -388,8 +472,9 @@
             grid-template-columns: repeat(17, 1fr);
             gap: 2px;
             margin: 20px 0;
-            width: 340px;
-            height: 120px;
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
         }
 
         .mission-tech-cell {
@@ -427,10 +512,15 @@
         }
 
         #mission-tech-status {
-            font-size: 8px;
+            font-size: 12px;
             color: #88f;
-            margin-top: 10px;
+            margin-top: 15px;
             opacity: 0.9;
+            width: 100%;
+            word-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         @keyframes techCellPulse {
@@ -505,10 +595,10 @@
 
         #tech-loading-grid {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(21, 1fr);
             gap: 2px;
             margin: 20px 0;
-            width: 200px;
+            width: 525px;
             height: 200px;
         }
 
@@ -531,7 +621,7 @@
         }
 
         #tech-loading-progress {
-            width: 300px;
+            width: 525px;
             height: 4px;
             background: #001133;
             border: 1px solid #004466;
@@ -635,6 +725,21 @@
                 <div id="tech-loading-status">Processing neural networks...</div>
             </div>
         </div>
+
+        <!-- After-Action Report Modal -->
+        <div id="report-modal">
+            <div id="report-modal-header">
+                <h1 id="report-modal-title">After-Action Report</h1>
+            </div>
+            <div id="report-modal-content">
+                <div id="report-text-container">
+                    <div id="report-text"></div>
+                </div>
+            </div>
+            <div id="report-button-container">
+                <button id="continue-button" class="action-button">CONTINUE</button>
+            </div>
+        </div>
         <div id="ui-container" style="display: none;">
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
@@ -680,11 +785,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- After Action Report Display -->
-                <div id="after-action-report-container" style="display: none;">
-                    <h2>After-Action Report</h2>
-                    <div id="after-action-report"></div>
-                </div>
             </div>
             <div id="button-container">
                 <button id="start-button" class="action-button">Start Game</button>
@@ -722,11 +822,12 @@
         const missionBriefingEl = document.getElementById('mission-briefing');
         const missionBriefingTitle = document.getElementById('mission-briefing-title');
         const missionTechDisplay = document.getElementById('mission-tech-display');
-        const afterActionReportContainer = document.getElementById('after-action-report-container');
-        const afterActionReportEl = document.getElementById('after-action-report');
         const techLoadingOverlay = document.getElementById('tech-loading-overlay');
         const techLoadingStatus = document.getElementById('tech-loading-status');
         const screenFadeOverlay = document.getElementById('screen-fade-overlay');
+        const reportModal = document.getElementById('report-modal');
+        const reportText = document.getElementById('report-text');
+        const continueButton = document.getElementById('continue-button');
 
         let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
@@ -854,7 +955,7 @@
             const grid = document.getElementById('tech-loading-grid');
             grid.innerHTML = '';
             
-            for (let i = 0; i < 64; i++) { // 8x8 grid
+            for (let i = 0; i < 168; i++) { // 21x8 grid
                 const cell = document.createElement('div');
                 cell.className = 'tech-grid-cell';
                 cell.style.setProperty('--delay', i);
@@ -948,6 +1049,19 @@
             techLoadingOverlay.style.display = 'none';
         }
 
+        // Show report modal
+        function showReportModal(reportTextContent) {
+            reportText.textContent = reportTextContent;
+            reportModal.style.display = 'flex';
+            modal.style.display = 'none'; // Hide the game over screen
+        }
+
+        // Hide report modal
+        function hideReportModal() {
+            reportModal.style.display = 'none';
+            modal.style.display = 'flex'; // Show the game over screen
+        }
+
         // Screen fade out effect
         function startScreenFadeOut() {
             screenFadeOverlay.style.display = 'block';
@@ -966,15 +1080,11 @@
         }
 
         async function generateReport(finalScore) {
-            highScoreDisplay.style.display = 'none'; // Hide scores to show report
-            reportButton.disabled = true;
-            afterActionReportContainer.style.display = 'block';
-            
             // Check if API key is configured
             if (!API_KEY || API_KEY.trim() === "") {
                 // No API key - show fallback report immediately
-                afterActionReportEl.textContent = "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
-                reportButton.style.display = 'none'; // Hide button since we're done
+                const fallbackText = "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
+                showReportModal(fallbackText);
                 return;
             }
 
@@ -990,13 +1100,12 @@
                 
                 // Hide loading display and show result
                 hideTechLoading();
-                afterActionReportEl.textContent = text || "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
-                reportButton.style.display = 'none'; // Hide button on success
+                const reportContent = text || "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
+                showReportModal(reportContent);
             } catch (error) {
                 // Hide loading display and show error
                 hideTechLoading();
-                afterActionReportEl.textContent = "Error generating report. Please check your connection and try again.";
-                reportButton.disabled = false; // Re-enable on error
+                showReportModal("Error generating report. Please check your connection and try again.");
             }
         }
 
@@ -1007,7 +1116,6 @@
         function addHighScore(name, score) { const scores = loadHighScores(); scores.push({ name, score }); scores.sort((a, b) => b.score - a.score); saveHighScores(scores.slice(0, 10)); }
         function displayHighScores() {
             gameOverContent.style.display = 'none';
-            afterActionReportContainer.style.display = 'none';
             highScoreDisplay.style.display = 'block';
             highScoreList.innerHTML = '';
             const scores = loadHighScores();
@@ -1147,7 +1255,6 @@
             missionBriefingContainer.style.display = 'block';
             gameOverContent.style.display = 'none';
             highScoreDisplay.style.display = 'none';
-            afterActionReportContainer.style.display = 'none';
             reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
             
@@ -1162,7 +1269,6 @@
 
             missionBriefingContainer.style.display = 'none';
             highScoreDisplay.style.display = 'none';
-            afterActionReportContainer.style.display = 'none';
 
             gameOverContent.style.display = 'block';
             modalScoreEl.style.display = 'block';
@@ -1192,7 +1298,6 @@
 
             missionBriefingContainer.style.display = 'none';
             highScoreDisplay.style.display = 'none';
-            afterActionReportContainer.style.display = 'none';
 
             gameOverContent.style.display = 'block';
             modalScoreEl.style.display = 'block';
@@ -1350,6 +1455,11 @@
 
         exitButton.addEventListener('click', () => {
             window.location.href = 'https://RichLewis007.com';
+        });
+
+        continueButton.addEventListener('click', () => {
+            hideReportModal();
+            showEndModal();
         });
 
         // --- Window Resizing & Initial Setup ---
