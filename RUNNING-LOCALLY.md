@@ -1,8 +1,8 @@
-# 🧪 Local Testing Guide
+# Running Locally
 
-This guide helps you test the AI features locally without exposing your API key to GitHub.
+This guide helps you see the AI features locally without exposing your API key to GitHub.
 
-## 🔑 Getting Your API Key
+## Getting Your API Key
 
 1. Go to [Google AI Studio](https://aistudio.google.com/)
 2. Sign in with your Google account
@@ -10,7 +10,7 @@ This guide helps you test the AI features locally without exposing your API key 
 4. Create a new API key
 5. Copy the key (it looks like: `AIzaSyC...`)
 
-## 🚀 Quick Setup
+## Quick Setup
 
 ### Option 1: Using the Local Run Script (Recommended)
 
@@ -27,7 +27,7 @@ This guide helps you test the AI features locally without exposing your API key 
    
    The script will:
    - Check if your .env file exists
-   - If found: Run the development workflow (generates local test file and opens it in browser)
+   - If found: Run the development workflow (generates local html file and opens it in browser)
    - If not found: Provide step-by-step setup instructions
 
 ### Option 2: Manual Setup
@@ -43,18 +43,18 @@ This guide helps you test the AI features locally without exposing your API key 
    - Replace `YOUR_API_KEY_HERE` with your actual API key
    - Save the file
 
-3. **Open the local test file in your web browser:**
+3. **Open the local html file in your web browser:**
    ```bash
    open local-index.html
    ```
 
-4. **Test the AI features:**
+4. **See the AI features:**
    - Refresh the page in your browser
    - You should see "RUNNING LOCALLY" at the top
    - Start a game and play until you die
-   - Click "Generate Report" to test the AI after-action report
+   - Click "Generate Report" to see the AI after-action report
 
-## ✅ What to Test
+## What to see with AI key set
 
 ### Mission Briefing
 - **With API Key**: Should show a spinner, then AI-generated mission text
@@ -64,13 +64,13 @@ This guide helps you test the AI features locally without exposing your API key 
 - **With API Key**: Should show a spinner, then AI-generated report based on your score
 - **Without API Key**: Should show "Your comms were damaged in the fight. No report available."
 
-## 🔒 Security Notes
+## Security Notes
 
-- ✅ `local-index.html` is in `.gitignore` - it won't be committed to GitHub
-- ✅ Your API key stays on your local machine only
-- ✅ The main `index.html` has an empty API key for GitHub Pages
+- `local-index.html` is in `.gitignore` - it won't be committed to GitHub
+- Your API key stays on your local machine only
+- The main `index.html` has an empty API key for GitHub Pages
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 **"API request failed after multiple retries"**
 - Check your API key is correct
@@ -86,7 +86,7 @@ This guide helps you test the AI features locally without exposing your API key 
 - Try refreshing the page
 - Verify your API key has the right permissions
 
-## 🎯 Expected Behavior
+## Expected Behavior
 
 When working correctly:
 1. **Mission Briefing**: Shows spinner → AI-generated mission text
@@ -95,27 +95,27 @@ When working correctly:
 
 The AI should generate different content each time you play!
 
-## 🚀 Quick Reference
+## Quick Reference
 
 ### Using the Local Run Script
 ```bash
 # Create .env file with your API key
 echo 'GEMINI_API_KEY=your_key_here' > .env
 
-# Run development workflow (generates and opens local test file)
+# Run development workflow (generates and opens local html file)
 ./local-run.sh
 ```
 
 ### Manual Setup
 ```bash
-# Generate local test file
-node generate-local-test.js
+# Generate local html file
+node generate-local-html.js
 
 # Open in browser
 open local-index.html
 ```
 
 ### Script Features
-- **local-run.sh**: Validates .env file and runs development workflow (generates and opens local test file)
-- **generate-local-test.js**: Creates local test file with AI features enabled
+- **local-run.sh**: Validates .env file and runs development workflow (generates and opens local html file)
+- **generate-local-html.js**: Creates local html file with AI features enabled
 - Both scripts provide helpful error messages and setup guidance
