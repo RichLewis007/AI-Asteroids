@@ -32,9 +32,9 @@ This guide helps you test the AI features locally without exposing your API key 
 
 ### Option 2: Manual Setup
 
-1. **Open the local test file:**
+1. Copy index.html to local-index.html using the command:
    ```bash
-   open local-index.html
+   cp index.html local-index.html
    ```
 
 2. **Add your API key:**
@@ -43,7 +43,12 @@ This guide helps you test the AI features locally without exposing your API key 
    - Replace `YOUR_API_KEY_HERE` with your actual API key
    - Save the file
 
-3. **Test the AI features:**
+3. **Open the local test file in your web browser:**
+   ```bash
+   open local-index.html
+   ```
+
+4. **Test the AI features:**
    - Refresh the page in your browser
    - You should see "🧪 LOCAL TESTING MODE" at the top
    - Start a game and play until you die
