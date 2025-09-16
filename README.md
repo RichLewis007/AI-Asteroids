@@ -78,6 +78,23 @@ const API_KEY = "PASTE_YOUR_API_KEY_HERE";
 ```
 **Save and Run:** Save the file and open it in a web browser. **The mission briefings and after-action reports will now work.**
 
+## Local Testing Setup
+
+For developers who want to test the AI features without modifying the main `index.html` file, there's a dedicated local testing setup:
+
+### Quick Local Testing
+1. **Use the local test file:** Open `index-local.html` in your browser
+2. **Add your API key:** Edit the file and replace `YOUR_API_KEY_HERE` with your actual Gemini API key
+3. **Test AI features:** The file includes a "🧪 LOCAL TESTING MODE" indicator and identical functionality to the main game
+
+### Benefits of Local Testing
+- ✅ **Safe development:** Your API key stays local and won't be committed to GitHub
+- ✅ **Identical functionality:** Same game features as the main version
+- ✅ **Easy switching:** Test with/without API key by commenting/uncommenting the key
+- ✅ **No conflicts:** Doesn't affect the public GitHub Pages deployment
+
+The local test file is automatically excluded from version control to keep your API key secure.
+
 ## Getting Started
 ```bash
 # Clone the repository

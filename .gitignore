@@ -35,3 +35,7 @@ coverage/
 # Temporary folders
 tmp/
 temp/
+
+# Local testing files (contains API keys)
+index-local.html
+local-test.sh
