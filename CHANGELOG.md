@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated version management system with git tag integration
 - Development documentation (DEVELOPMENT.md) for maintainers
 - GitHub Actions workflow for automatic version updates
+- Local testing setup (index-local.html) for safe AI feature development
+- Local testing documentation in README for developers
 
 ### Changed
 - Removed 10-second countdown timer that prevented immediate game restart after game over
