@@ -6,8 +6,8 @@
   "scripts": {
     "update-version": "node update-version.js",
     "build": "npm run update-version",
-    "generate-local-test": "node generate-local-test.js",
-    "dev": "npm run generate-local-test && echo 'Local game file local-index.html generated! Play the game in your browser.'",
+    "generate-local-html": "node generate-local-html.js",
+    "dev": "npm run generate-local-html && echo 'Local game file local-index.html generated! Play the game locally in your browser.'",
     "release": "npm run build && git add . && git commit -m 'Update version' && git push"
   },
   "repository": {

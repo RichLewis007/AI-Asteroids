@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Generate Local Testing File
+ * Generate Local HTML File
  * 
  * This script automatically creates local-index.html from index.html
  * by replacing the empty API_KEY with your actual API key from .env file.
  * 
- * Usage: node generate-local-test.js
+ * Usage: node generate-local-html.js
  */
 
 const fs = require('fs');

@@ -18,7 +18,7 @@ AI-Asteroids/
 ├── DEVELOPMENT.md         # This file - developer documentation
 ├── package.json           # Node.js dependencies and scripts
 ├── local-run.sh           # Local development workflow runner
-├── generate-local-test.js # Local test file generator
+├── generate-local-html.js # Local html file generator
 ├── update-version.js      # Version update automation script
 └── .github/workflows/     # GitHub Actions automation
 ```
@@ -93,8 +93,8 @@ A bash script that simplifies local development by checking for required configu
 - Node.js and npm installed
 - `.env` file with `GEMINI_API_KEY` (or the script will guide you to create one)
 
-### generate-local-test.js
-A Node.js script that creates a local testing version of the game with AI features enabled.
+### generate-local-html.js
+A Node.js script that creates a local version of the game with AI features enabled.
 
 **Features:**
 - Automatically reads API key from `.env` file
@@ -104,7 +104,7 @@ A Node.js script that creates a local testing version of the game with AI featur
 
 **Usage:**
 ```bash
-node generate-local-test.js
+node generate-local-html.js
 ```
 
 **What it updates:**
@@ -160,7 +160,7 @@ For safe testing of AI features without exposing your API key to the repository:
 cp .env.example .env
 # Edit .env with your actual Gemini API key
 
-# 2. Generate local test file from main index.html
+# 2. Generate local html file from main index.html
 npm run dev
 ```
 
