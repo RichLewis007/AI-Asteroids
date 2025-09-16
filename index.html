@@ -13,20 +13,18 @@
     <style>
         body {
             margin: 0;
+            padding: 0;
             background-color: #000;
             color: #fff;
             font-family: 'Press Start 2P', cursive;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
             overflow: hidden;
         }
 
         #game-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,10 +33,11 @@
         canvas {
             background-color: #0a0a1a;
             display: block;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
             cursor: crosshair;
             touch-action: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         #ui-container {
@@ -50,7 +49,10 @@
         }
 
         #modal {
-            position: absolute;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.85);
             border-radius: 15px;
             padding: 40px;
@@ -64,6 +66,7 @@
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
             width: 80%;
             max-width: 600px;
+            z-index: 1000;
         }
 
         #version-display {
@@ -77,17 +80,20 @@
         }
 
         #game-over-overlay {
-            position: absolute;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(3);
             color: #ff4444;
             font-size: 80px;
             text-shadow: 4px 4px 0 #000;
-            transform: scale(3);
             opacity: 0;
             pointer-events: none;
             /* So it doesn't block clicks */
             display: none;
             /* Start hidden */
             transition: all 0.3s ease-out;
+            z-index: 999;
         }
 
         #game-over-overlay.show {
@@ -96,15 +102,15 @@
 
         @keyframes gameOverAnimation {
             0% {
-                transform: scale(3);
+                transform: translate(-50%, -50%) scale(3);
                 opacity: 0;
             }
             50% {
-                transform: scale(1.2);
+                transform: translate(-50%, -50%) scale(1.2);
                 opacity: 1;
             }
             100% {
-                transform: scale(1);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
             }
         }
@@ -115,11 +121,11 @@
 
         @keyframes fadeOutAnimation {
             from {
-                transform: scale(1);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 1;
             }
             to {
-                transform: scale(1);
+                transform: translate(-50%, -50%) scale(1);
                 opacity: 0;
             }
         }
@@ -781,7 +787,24 @@
         });
 
         // --- Window Resizing & Initial Setup ---
-        function resizeCanvas() { const size = Math.min(window.innerWidth * 0.9, window.innerHeight * 0.9, 800); canvas.width = size; canvas.height = size; if (player) { player.x = canvas.width / 2; player.y = canvas.height / 2; } if (gameActive || !stars) { stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } } canvasRect = canvas.getBoundingClientRect(); }
+        function resizeCanvas() { 
+            // Make canvas fill the entire screen
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+            if (player) { 
+                player.x = canvas.width / 2; 
+                player.y = canvas.height / 2; 
+            } 
+            if (gameActive || !stars) { 
+                stars = []; 
+                for (let i = 0; i < 100; i++) { 
+                    const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; 
+                    const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; 
+                    stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); 
+                } 
+            } 
+            canvasRect = canvas.getBoundingClientRect(); 
+        }
         // --- Version Management ---
         function updateVersionDisplay() {
             // Try to get version from git tags via API, fallback to hardcoded version
