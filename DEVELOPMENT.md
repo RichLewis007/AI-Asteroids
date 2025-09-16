@@ -17,6 +17,8 @@ AI-Asteroids/
 ├── CHANGELOG.md           # Version history and changes
 ├── DEVELOPMENT.md         # This file - developer documentation
 ├── package.json           # Node.js dependencies and scripts
+├── local-run.sh           # Local development workflow runner
+├── generate-local-test.js # Local test file generator
 ├── update-version.js      # Version update automation script
 └── .github/workflows/     # GitHub Actions automation
 ```
@@ -65,6 +67,50 @@ npm run release        # Update version + commit + push
 1. **Version Detection**: The script reads the latest git tag using `git describe --tags --abbrev=0`
 2. **File Update**: Updates the `fallbackVersion` variable in `index.html`
 3. **Display**: JavaScript displays the version in the game UI
+
+## 🛠️ Development Scripts
+
+### local-run.sh
+A bash script that simplifies local development by checking for required configuration and running the development workflow.
+
+**Features:**
+- Validates .env file existence before running the development workflow
+- Provides step-by-step guidance for API key setup
+- Uses colored output for better user experience
+- Automatically runs `npm run dev` when properly configured (which generates and opens the local test file)
+
+**Usage:**
+```bash
+./local-run.sh
+```
+
+**What it does:**
+1. Checks if `.env` file exists
+2. If found: Runs `npm run dev` (which generates `local-index.html` and opens it in browser)
+3. If not found: Displays setup instructions and exits
+
+**Prerequisites:**
+- Node.js and npm installed
+- `.env` file with `GEMINI_API_KEY` (or the script will guide you to create one)
+
+### generate-local-test.js
+A Node.js script that creates a local testing version of the game with AI features enabled.
+
+**Features:**
+- Automatically reads API key from `.env` file
+- Generates `local-index.html` with AI features enabled
+- Updates version numbers across multiple files
+- Opens the generated file in the default browser
+
+**Usage:**
+```bash
+node generate-local-test.js
+```
+
+**What it updates:**
+- `local-index.html`: Creates local test file with API key
+- `package.json`: Updates version to latest git tag
+- `README.md`: Updates version badges and text
 
 ## 🎮 Game Features
 
@@ -119,7 +165,7 @@ npm run dev
 ```
 
 This command:
-- ✅ **Automatically generates** `index-local.html` from the latest `index.html`
+- ✅ **Automatically generates** `local-index.html` from the latest `index.html`
 - ✅ **Adds testing indicators** (visual notice, updated title)
 - ✅ **Automatically inserts your API key** from `.env` file
 - ✅ **Opens in browser** for immediate testing
@@ -135,7 +181,7 @@ cp .env.example .env
 # 3. Generate fresh local test file with API key
 npm run dev
 # 4. Test AI features locally
-# 5. Commit changes to index.html (not index-local.html)
+# 5. Commit changes to index.html (not local-index.html)
 ```
 
 #### Benefits

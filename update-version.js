@@ -25,9 +25,9 @@ try {
     // Write the updated content back
     fs.writeFileSync('index.html', htmlContent);
     
-    console.log(`✅ Updated version to ${latestTag} in index.html`);
+    console.log(`• Updated version to ${latestTag} in index.html`);
     
 } catch (error) {
-    console.error('❌ Error updating version:', error.message);
+    console.error('• Error updating version:', error.message);
     process.exit(1);
 }

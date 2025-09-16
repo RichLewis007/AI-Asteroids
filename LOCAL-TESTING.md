@@ -12,13 +12,33 @@ This guide helps you test the AI features locally without exposing your API key 
 
 ## 🚀 Quick Setup
 
+### Option 1: Using the Local Run Script (Recommended)
+
+1. **Create your .env file:**
+   ```bash
+   echo 'GEMINI_API_KEY=your_actual_api_key_here' > .env
+   ```
+   Replace `your_actual_api_key_here` with your actual Gemini API key.
+
+2. **Run the development workflow:**
+   ```bash
+   ./local-run.sh
+   ```
+   
+   The script will:
+   - Check if your .env file exists
+   - If found: Run the development workflow (generates local test file and opens it in browser)
+   - If not found: Provide step-by-step setup instructions
+
+### Option 2: Manual Setup
+
 1. **Open the local test file:**
    ```bash
-   open index-local.html
+   open local-index.html
    ```
 
 2. **Add your API key:**
-   - Open `index-local.html` in a text editor
+   - Open `local-index.html` in a text editor
    - Find line 439: `const API_KEY = "YOUR_API_KEY_HERE";`
    - Replace `YOUR_API_KEY_HERE` with your actual API key
    - Save the file
@@ -41,7 +61,7 @@ This guide helps you test the AI features locally without exposing your API key 
 
 ## 🔒 Security Notes
 
-- ✅ `index-local.html` is in `.gitignore` - it won't be committed to GitHub
+- ✅ `local-index.html` is in `.gitignore` - it won't be committed to GitHub
 - ✅ Your API key stays on your local machine only
 - ✅ The main `index.html` has an empty API key for GitHub Pages
 
@@ -69,3 +89,28 @@ When working correctly:
 3. **Fallback Mode**: Shows static text when no API key or API fails
 
 The AI should generate different content each time you play!
+
+## 🚀 Quick Reference
+
+### Using the Local Run Script
+```bash
+# Create .env file with your API key
+echo 'GEMINI_API_KEY=your_key_here' > .env
+
+# Run development workflow (generates and opens local test file)
+./local-run.sh
+```
+
+### Manual Setup
+```bash
+# Generate local test file
+node generate-local-test.js
+
+# Open in browser
+open local-index.html
+```
+
+### Script Features
+- **local-run.sh**: Validates .env file and runs development workflow (generates and opens local test file)
+- **generate-local-test.js**: Creates local test file with AI features enabled
+- Both scripts provide helpful error messages and setup guidance

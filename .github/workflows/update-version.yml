@@ -21,7 +21,7 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Update version in index.html
+    - name: Update version in files
       run: |
         # Get the tag name (without refs/tags/ prefix)
         TAG_NAME=${GITHUB_REF#refs/tags/}
@@ -33,10 +33,18 @@ jobs:
         # Update the version in index.html
         sed -i "s/const fallbackVersion = \"[^\"]*\";/const fallbackVersion = \"$TAG_NAME\";/" index.html
         
+        # Update the version in package.json
+        npm version $TAG_NAME --no-git-tag-version
+        
+        # Update version patterns in README.md if they exist
+        sed -i "s/\(version:\s*\)v\.[0-9]\+/\1$TAG_NAME/gi" README.md
+        sed -i "s/\(badge.*version.*\)v\.[0-9]\+/\1$TAG_NAME/gi" README.md
+        sed -i "s/\(current version:\s*\)v\.[0-9]\+/\1$TAG_NAME/gi" README.md
+        
     - name: Commit and push changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add index.html
+        git add index.html package.json README.md
         git commit -m "Auto-update version to $TAG_NAME" || exit 0
         git push origin main

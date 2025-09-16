@@ -1,6 +1,9 @@
 # AI Asteroids
 
 ![License](https://img.shields.io/badge/license-mit-blue.svg)
+![Version](https://img.shields.io/badge/version-v.009-blue.svg)
+
+**Current Version:** v.009
 <!-- ![GitHub issues](https://img.shields.io/github/issues/RichLewis007/asteroid-blaster)
 ![GitHub stars](https://img.shields.io/github/stars/RichLewis007/asteroid-blaster)
 ![GitHub forks](https://img.shields.io/github/forks/RichLewis007/asteroid-blaster) -->
@@ -98,7 +101,7 @@ For developers who want to test the AI features without modifying the main `inde
    ```bash
    npm run dev
    ```
-   This automatically creates `index-local.html` from the main `index.html` file, inserts your API key, and opens it in your browser.
+   This automatically creates `local-index.html` from the main `index.html` file, inserts your API key, and opens it in your browser.
 
 3. **Test AI features:** The file includes a "🧪 LOCAL TESTING MODE" indicator and identical functionality to the main game
 
