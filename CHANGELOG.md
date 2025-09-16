@@ -5,35 +5,64 @@ All notable changes to AI Asteroids will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v.009] - 2025-09-16
 
 ### Added
-- CHANGELOG.md file to track project changes
-- Exit button (🚪) to navigate to https://RichLewis007.com
-- Immediate fallback text display when no API key is configured
-- Version number display (v.002) shown in top-right corner of all menus
-- Automated version management system with git tag integration
-- Development documentation (DEVELOPMENT.md) for maintainers
-- GitHub Actions workflow for automatic version updates
-- Local testing setup (local-index.html) for safe AI feature development
-- Automated local testing file generation script (generate-local-test.js)
-- .env file support for automatic API key injection
-- .env.example file for easy setup documentation
-- Automatic browser opening for generated local test files
 - High-tech animated loading display for after-action report generation
 - Seamless screen fade-out effect when player dies, leading directly to tech display
+- After-action report queuing system for better performance
+
+### Changed
+- After-action reports now use final score with seamless fade-to-tech-display flow
+- Improved after-action report generation timing and user experience
+
+## [v.008] - 2025-08-21
+
+### Added
+- Automated local testing file generation script (generate-local-test.js)
+- Automatic browser opening for generated local test files
 - Local testing documentation in README for developers
+
+### Changed
+- Local testing workflow now automated - no more manual file syncing required
+- API key management now uses .env files for better security and convenience
+
+## [v.007] - 2025-08-20
+
+### Added
+- .env file support for automatic API key injection
+- .env.example file for easy setup documentation
+- GitHub Actions workflow for automatic version updates
+
+### Changed
+- Improved UX by eliminating unnecessary loading spinners for users without API key
+- Exit button now navigates to https://RichLewis007.com in same window instead of new tab
+
+## [v.006] - 2025-08-19
+
+### Added
+- Development documentation (DEVELOPMENT.md) for maintainers
+- Local testing setup (local-index.html) for safe AI feature development
+
+### Changed
+- Mission briefing now shows fallback text immediately when no API key is set
+- After-action reports now show fallback text immediately when no API key is set
+
+## [v.005] - 2025-08-18
+
+### Added
+- Automated version management system with git tag integration
+- Version number display shown in top-right corner of all menus
 
 ### Changed
 - Removed 10-second countdown timer that prevented immediate game restart after game over
 - Cleaned up restart button logic for better user experience
-- Mission briefing now shows fallback text immediately when no API key is set
-- After-action reports now show fallback text immediately when no API key is set
-- Improved UX by eliminating unnecessary loading spinners for users without API key
-- Exit button now navigates to https://RichLewis007.com in same window instead of new tab
-- Local testing workflow now automated - no more manual file syncing required
-- API key management now uses .env files for better security and convenience
-- After-action reports now use final score with seamless fade-to-tech-display flow
+
+## [v.004] - 2025-08-17
+
+### Added
+- Exit button (🚪) to navigate to https://RichLewis007.com
+- Immediate fallback text display when no API key is configured
 
 ### Changed
 - Game canvas now fills entire screen for immersive fullscreen experience
@@ -45,10 +74,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced unreliable GSAP dependency with pure CSS animations
 - Fixed timing issues that prevented game over animation from showing
 
+## [v.003] - 2025-08-16
+
+### Added
+- CHANGELOG.md file to track project changes
+
 ### Security
 - Removed private email address from git history and public repository
 
-## [v.002] - 2025-09-15
+## [v.002] - 2025-08-15
 
 ### Added
 - Live link to play the game in README
