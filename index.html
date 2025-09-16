@@ -724,7 +724,7 @@
                     if ((dx * dx + dy * dy) <= r * r) {
                         for (let i = 0; i < enemy.radius * 2; i++) { particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, { x: (Math.random() - 0.5) * 6, y: (Math.random() - 0.5) * 6 })); }
                         playExplosionSound(projectile.x, projectile.y);
-                        if (enemy.radius - 10 > 10) { score += 100; scoreEl.innerHTML = score; if (window.gsap) { gsap.to(enemy, { radius: enemy.radius - 10 }); } else { enemy.radius = enemy.radius - 10; } setTimeout(() => { projectiles.splice(pIndex, 1); }, 0); }
+                        if (enemy.radius - 10 > 10) { score += 100; scoreEl.innerHTML = score; enemy.radius = enemy.radius - 10; setTimeout(() => { projectiles.splice(pIndex, 1); }, 0); }
                         else { score += 250; scoreEl.innerHTML = score; setTimeout(() => { enemies.splice(eIndex, 1); projectiles.splice(pIndex, 1); }, 0); }
                     }
                 });

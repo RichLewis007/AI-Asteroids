@@ -33,7 +33,6 @@
 - Control your ship using the keyboard or mouse, but in a different way from the traditional "Asteroids" games. Uee the WASD or cursor keys to move the spaceship, and use the mouse to aim the ship's blaster. Press space or left click to shoot where the mouse pointer is aiming. I think this is a better way to control the ship than the old, keyboard-only setup. Do you?
 - Crazy simple sound effects, with custom composed explosion sound, etc.
 - CRAZY SPACE ACTION!
-- Uses GSAP for animation: https://gsap.com/
 - Uses Tone library for sounds: https://tonejs.github.io/
 
 ## Generative AI features
