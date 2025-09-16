@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development documentation (DEVELOPMENT.md) for maintainers
 - GitHub Actions workflow for automatic version updates
 - Local testing setup (index-local.html) for safe AI feature development
+- Automated local testing file generation script (generate-local-test.js)
+- .env file support for automatic API key injection
+- .env.example file for easy setup documentation
+- Automatic browser opening for generated local test files
+- High-tech animated loading display for after-action report generation
+- Seamless screen fade-out effect when player dies, leading directly to tech display
 - Local testing documentation in README for developers
 
 ### Changed
@@ -25,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - After-action reports now show fallback text immediately when no API key is set
 - Improved UX by eliminating unnecessary loading spinners for users without API key
 - Exit button now navigates to https://RichLewis007.com in same window instead of new tab
+- Local testing workflow now automated - no more manual file syncing required
+- API key management now uses .env files for better security and convenience
+- After-action reports now use final score with seamless fade-to-tech-display flow
 
 ### Changed
 - Game canvas now fills entire screen for immersive fullscreen experience

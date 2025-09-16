@@ -290,6 +290,165 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* High-Tech Loading Display */
+        #tech-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #000011, #001122, #000011);
+            background-size: 400% 400%;
+            animation: techBackground 3s ease-in-out infinite;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        @keyframes techBackground {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        #tech-loading-content {
+            text-align: center;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+
+        #tech-loading-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            animation: techPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes techPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        #tech-loading-subtitle {
+            font-size: 12px;
+            margin-bottom: 30px;
+            color: #00ff88;
+            animation: techFlicker 1.5s ease-in-out infinite;
+        }
+
+        @keyframes techFlicker {
+            0%, 100% { opacity: 1; }
+            25% { opacity: 0.8; }
+            50% { opacity: 1; }
+            75% { opacity: 0.9; }
+        }
+
+        #tech-loading-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            width: 200px;
+            height: 200px;
+        }
+
+        .tech-grid-cell {
+            background: #001133;
+            border: 1px solid #004466;
+            animation: techGridPulse 0.5s ease-in-out infinite;
+            animation-delay: calc(var(--delay) * 0.1s);
+        }
+
+        @keyframes techGridPulse {
+            0%, 100% { 
+                background: #001133; 
+                box-shadow: 0 0 5px #004466;
+            }
+            50% { 
+                background: #00ff88; 
+                box-shadow: 0 0 15px #00ff88;
+            }
+        }
+
+        #tech-loading-progress {
+            width: 300px;
+            height: 4px;
+            background: #001133;
+            border: 1px solid #004466;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tech-loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ffff, #00ff88);
+            background-size: 200% 100%;
+            animation: techProgress 2s ease-in-out infinite, techBarMove 3s linear infinite;
+            width: 0%;
+        }
+
+        @keyframes techProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes techBarMove {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        #tech-loading-status {
+            font-size: 10px;
+            color: #00ff88;
+            margin-top: 10px;
+            animation: techStatusFlicker 1s ease-in-out infinite;
+        }
+
+        @keyframes techStatusFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .tech-scan-line {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            animation: techScan 2s linear infinite;
+        }
+
+        @keyframes techScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Screen Fade Out Effect */
+        #screen-fade-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            opacity: 0;
+            z-index: 1500;
+            pointer-events: none;
+            display: none;
+        }
+
+        #screen-fade-overlay.fade-out {
+            animation: screenFadeOut 2s ease-in forwards;
+        }
+
+        @keyframes screenFadeOut {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -298,6 +457,26 @@
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="game-over-overlay">GAME OVER</div>
+        
+        <!-- Screen Fade Overlay -->
+        <div id="screen-fade-overlay"></div>
+        
+        <!-- High-Tech Loading Display -->
+        <div id="tech-loading-overlay">
+            <div id="tech-loading-content">
+                <div id="tech-loading-title">ANALYZING COMBAT DATA</div>
+                <div id="tech-loading-subtitle">Generating After-Action Report...</div>
+                
+                <div id="tech-loading-grid" id="tech-grid"></div>
+                
+                <div id="tech-loading-progress">
+                    <div id="tech-loading-bar"></div>
+                    <div class="tech-scan-line"></div>
+                </div>
+                
+                <div id="tech-loading-status">Processing neural networks...</div>
+            </div>
+        </div>
         <div id="ui-container" style="display: none;">
             <span>Score: </span><span id="scoreEl">0</span>
         </div>
@@ -367,10 +546,16 @@
         const missionBriefingEl = document.getElementById('mission-briefing');
         const afterActionReportContainer = document.getElementById('after-action-report-container');
         const afterActionReportEl = document.getElementById('after-action-report');
+        const techLoadingOverlay = document.getElementById('tech-loading-overlay');
+        const techLoadingStatus = document.getElementById('tech-loading-status');
+        const screenFadeOverlay = document.getElementById('screen-fade-overlay');
 
         let animationId, score = 0, gameActive = false, inactivityTimer, toneStarted = false;
         const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         let canvasRect = null;
+        
+        // High-tech loading display for after-action report generation
+        let loadingDisplayActive = false;
 
         // --- Audio Initialization (lazy-load Tone.js) ---
         let toneLibraryLoadPromise;
@@ -478,6 +663,71 @@
             }
         }
 
+        // Create animated tech grid
+        function createTechGrid() {
+            const grid = document.getElementById('tech-loading-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 64; i++) { // 8x8 grid
+                const cell = document.createElement('div');
+                cell.className = 'tech-grid-cell';
+                cell.style.setProperty('--delay', i);
+                grid.appendChild(cell);
+            }
+        }
+
+        // Show tech loading display with animated status messages
+        function showTechLoading() {
+            if (loadingDisplayActive) return;
+            
+            loadingDisplayActive = true;
+            techLoadingOverlay.style.display = 'flex';
+            createTechGrid();
+            
+            const statusMessages = [
+                'Processing neural networks...',
+                'Analyzing combat patterns...',
+                'Calculating performance metrics...',
+                'Generating tactical assessment...',
+                'Compiling mission data...',
+                'Finalizing report...'
+            ];
+            
+            let messageIndex = 0;
+            const statusInterval = setInterval(() => {
+                if (!loadingDisplayActive) {
+                    clearInterval(statusInterval);
+                    return;
+                }
+                
+                techLoadingStatus.textContent = statusMessages[messageIndex];
+                messageIndex = (messageIndex + 1) % statusMessages.length;
+            }, 2500);
+        }
+
+        // Hide tech loading display
+        function hideTechLoading() {
+            loadingDisplayActive = false;
+            techLoadingOverlay.style.display = 'none';
+        }
+
+        // Screen fade out effect
+        function startScreenFadeOut() {
+            screenFadeOverlay.style.display = 'block';
+            screenFadeOverlay.classList.remove('fade-out');
+            
+            // Start fade animation after a brief delay
+            setTimeout(() => {
+                screenFadeOverlay.classList.add('fade-out');
+            }, 10);
+        }
+
+        // Hide screen fade overlay
+        function hideScreenFade() {
+            screenFadeOverlay.style.display = 'none';
+            screenFadeOverlay.classList.remove('fade-out');
+        }
+
         async function generateReport(finalScore) {
             highScoreDisplay.style.display = 'none'; // Hide scores to show report
             reportButton.disabled = true;
@@ -491,15 +741,23 @@
                 return;
             }
 
-            // API key is configured - show loader and try to generate report
-            afterActionReportEl.innerHTML = '<div class="loader"></div>';
+            // Show the cool tech loading display
+            showTechLoading();
+            
+            // Generate report with actual final score
             const prompt = `Write a heroic after-action report for a space fighter pilot. Their final score was ${finalScore}. Describe their bravery and skill. If the score is low (under 2000), make it a bit funny, like they survived by luck. If the score is high (over 10000), describe them as a legendary ace. Keep it to a short paragraph.`;
+            
             try {
                 const result = await fetchWithExponentialBackoff(API_URL, { contents: [{ parts: [{ text: prompt }] }] });
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                // Hide loading display and show result
+                hideTechLoading();
                 afterActionReportEl.textContent = text || "Your comms were damaged in the fight. No report available. Your score was " + finalScore + ".";
                 reportButton.style.display = 'none'; // Hide button on success
             } catch (error) {
+                // Hide loading display and show error
+                hideTechLoading();
                 afterActionReportEl.textContent = "Error generating report. Please check your connection and try again.";
                 reportButton.disabled = false; // Re-enable on error
             }
@@ -600,7 +858,29 @@
 
         // --- Game State & Initialization ---
         let player, projectiles, enemies, particles, stars, enemySpawnInterval;
-        function init() { gameActive = true; score = 0; scoreEl.innerHTML = score; uiContainer.style.display = 'block'; modal.style.display = 'none'; player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white'); projectiles = []; enemies = []; particles = []; stars = []; for (let i = 0; i < 100; i++) { const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); } spawnEnemies(); }
+        function init() { 
+            gameActive = true; 
+            score = 0; 
+            scoreEl.innerHTML = score; 
+            uiContainer.style.display = 'block'; 
+            modal.style.display = 'none'; 
+            player = new Player(canvas.width / 2, canvas.height / 2, 15, 'white'); 
+            projectiles = []; 
+            enemies = []; 
+            particles = []; 
+            stars = []; 
+            
+            // Reset loading display state for new game
+            loadingDisplayActive = false;
+            hideScreenFade();
+            
+            for (let i = 0; i < 100; i++) { 
+                const r = Math.random() * 2, x = Math.random() * canvas.width, y = Math.random() * canvas.height; 
+                const c = Math.random() > 0.05 ? 'white' : `hsl(${Math.random() * 360}, 70%, 70%)`; 
+                stars.push(new Star(x, y, r, c, { x: 0, y: r * 0.5 })); 
+            } 
+            spawnEnemies(); 
+        }
         function spawnEnemies() {
             if (enemySpawnInterval) clearInterval(enemySpawnInterval);
             enemySpawnInterval = setInterval(() => {
@@ -666,6 +946,41 @@
             startButton.textContent = 'Restart Game';
         }
 
+        function showEndModalWithTechDisplay() {
+            modal.style.display = 'flex';
+            modalTitleEl.textContent = "Game Over";
+
+            missionBriefingContainer.style.display = 'none';
+            highScoreDisplay.style.display = 'none';
+            afterActionReportContainer.style.display = 'none';
+
+            gameOverContent.style.display = 'block';
+            modalScoreEl.style.display = 'block';
+            modalScoreEl.innerHTML = `Final Score: ${score}`;
+            highScoreForm.style.display = 'block';
+
+            reportButton.style.display = 'inline-block';
+            reportButton.disabled = false;
+            highScoreButton.style.display = 'inline-block';
+
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                displayHighScores();
+                highScoreForm.style.display = 'none';
+                reportButton.style.display = 'none';
+                highScoreButton.style.display = 'none';
+            }, 30000);
+
+            // Enable restart button immediately
+            startButton.disabled = false;
+            startButton.textContent = 'Restart Game';
+            
+            // Automatically start generating the report with tech display
+            if (API_KEY && API_KEY.trim() !== "") {
+                generateReport(score);
+            }
+        }
+
         function endGame() {
             if (!gameActive) return;
             gameActive = false;
@@ -684,13 +999,24 @@
             setTimeout(() => {
                 gameOverOverlay.classList.add('show');
                 
-                // After animation completes, fade out and show modal
+                // After animation completes, start screen fade out
                 setTimeout(() => {
                     gameOverOverlay.classList.add('fade-out');
+                    
+                    // Start screen fade out after game over animation
                     setTimeout(() => {
                         gameOverOverlay.style.display = 'none';
                         gameOverOverlay.classList.remove('show', 'fade-out');
-                        showEndModal();
+                        
+                        // Start screen fade out
+                        startScreenFadeOut();
+                        
+                        // After fade completes, show tech display and generate report
+                        setTimeout(() => {
+                            hideScreenFade();
+                            showEndModalWithTechDisplay();
+                        }, 2000); // Match screenFadeOut duration
+                        
                     }, 500); // Match fadeOutAnimation duration
                 }, 2000); // Show for 2 seconds after animation
             }, 10);

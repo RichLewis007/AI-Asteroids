@@ -104,6 +104,46 @@ npm run release        # Update version + commit + push
 3. For AI features, add your API key
 4. Make changes and test locally
 
+### 🧪 Local Testing with AI Features
+
+For safe testing of AI features without exposing your API key to the repository:
+
+#### Automated Local Testing Setup
+```bash
+# 1. Set up your API key (one-time setup)
+cp .env.example .env
+# Edit .env with your actual Gemini API key
+
+# 2. Generate local test file from main index.html
+npm run dev
+```
+
+This command:
+- ✅ **Automatically generates** `index-local.html` from the latest `index.html`
+- ✅ **Adds testing indicators** (visual notice, updated title)
+- ✅ **Automatically inserts your API key** from `.env` file
+- ✅ **Opens in browser** for immediate testing
+- ✅ **Always up-to-date** - no manual syncing required
+
+#### Development Workflow
+```bash
+# 1. Set up API key (one-time setup)
+cp .env.example .env
+# Edit .env with your actual API key
+
+# 2. Make changes to index.html
+# 3. Generate fresh local test file with API key
+npm run dev
+# 4. Test AI features locally
+# 5. Commit changes to index.html (not index-local.html)
+```
+
+#### Benefits
+- **No maintenance overhead** - local test file is always current
+- **Safe development** - API key never gets committed
+- **Identical functionality** - same features as main game
+- **Easy testing** - just run `npm run dev` after any changes
+
 ## 🚀 Deployment
 
 ### GitHub Pages

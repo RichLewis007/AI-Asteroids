@@ -6,6 +6,8 @@
   "scripts": {
     "update-version": "node update-version.js",
     "build": "npm run update-version",
+    "generate-local-test": "node generate-local-test.js",
+    "dev": "npm run generate-local-test && echo 'Local test file generated! Open index-local.html in your browser.'",
     "release": "npm run build && git add . && git commit -m 'Update version' && git push"
   },
   "repository": {

@@ -1,3 +1,10 @@
+# Local testing files (contains API keys)
+index-local.html
+local-notes.md
+
+# Environment variables
+.env
+
 # Node.js
 node_modules/
 npm-debug.log*
@@ -35,7 +42,3 @@ coverage/
 # Temporary folders
 tmp/
 temp/
-
-# Local testing files (contains API keys)
-index-local.html
-local-test.sh
