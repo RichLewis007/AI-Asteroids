@@ -50,9 +50,9 @@ This guide helps you test the AI features locally without exposing your API key 
 
 4. **Test the AI features:**
    - Refresh the page in your browser
-   - You should see "🧪 LOCAL TESTING MODE" at the top
+   - You should see "RUNNING LOCALLY" at the top
    - Start a game and play until you die
-   - Click "✨ Generate Report" to test the AI after-action report
+   - Click "Generate Report" to test the AI after-action report
 
 ## ✅ What to Test
 

@@ -2,13 +2,13 @@
 
 This document contains information for developers and maintainers of the AI Asteroids project.
 
-## 🚀 Quick Start
+## Quick Start
 
 1. Clone the repository
 2. Open `index.html` in a web browser
 3. For AI features, add your Gemini API key to the `API_KEY` variable
 
-## 📋 Project Structure
+## Project Structure
 
 ```
 AI-Asteroids/
@@ -23,7 +23,7 @@ AI-Asteroids/
 └── .github/workflows/     # GitHub Actions automation
 ```
 
-## 🔧 Version Management
+## Version Management
 
 The game automatically displays the current version number in the top-right corner of all menus. This version is managed through git tags and automated scripts.
 
@@ -68,7 +68,7 @@ npm run release        # Update version + commit + push
 2. **File Update**: Updates the `fallbackVersion` variable in `index.html`
 3. **Display**: JavaScript displays the version in the game UI
 
-## 🛠️ Development Scripts
+## Development Scripts
 
 ### local-run.sh
 A bash script that simplifies local development by checking for required configuration and running the development workflow.
@@ -112,7 +112,7 @@ node generate-local-test.js
 - `package.json`: Updates version to latest git tag
 - `README.md`: Updates version badges and text
 
-## 🎮 Game Features
+## Game Features
 
 ### Core Gameplay
 - Player ship with WASD/arrow key movement
@@ -132,7 +132,7 @@ node generate-local-test.js
 - **Features**: Spatial audio, multiple synthesizers
 - **Performance**: Lazy loading and connection pooling
 
-## 🔧 Development Setup
+## Development Setup
 
 ### Prerequisites
 - Node.js (for automation scripts)
@@ -150,7 +150,7 @@ node generate-local-test.js
 3. For AI features, add your API key
 4. Make changes and test locally
 
-### 🧪 Local Testing with AI Features
+### Local Testing with AI Features
 
 For safe testing of AI features without exposing your API key to the repository:
 
@@ -165,11 +165,11 @@ npm run dev
 ```
 
 This command:
-- ✅ **Automatically generates** `local-index.html` from the latest `index.html`
-- ✅ **Adds testing indicators** (visual notice, updated title)
-- ✅ **Automatically inserts your API key** from `.env` file
-- ✅ **Opens in browser** for immediate testing
-- ✅ **Always up-to-date** - no manual syncing required
+- **Automatically generates** `local-index.html` from the latest `index.html`
+- **Adds testing indicators** (visual notice, updated title)
+- **Automatically inserts your API key** from `.env` file
+- **Opens in browser** for immediate testing
+- **Always up-to-date** - no manual syncing required
 
 #### Development Workflow
 ```bash
@@ -190,7 +190,7 @@ npm run dev
 - **Identical functionality** - same features as main game
 - **Easy testing** - just run `npm run dev` after any changes
 
-## 🚀 Deployment
+## Deployment
 
 ### GitHub Pages
 The game is automatically deployed to GitHub Pages:
@@ -203,7 +203,7 @@ The game is automatically deployed to GitHub Pages:
 2. Commit and push to `main` branch
 3. GitHub Pages automatically rebuilds and deploys
 
-## 📝 Contributing
+## Contributing
 
 ### Code Style
 - Follow existing code formatting
@@ -224,7 +224,7 @@ The game is automatically deployed to GitHub Pages:
 3. Push tag: `git push origin v.XXX`
 4. GitHub Actions will handle version display update
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -245,7 +245,7 @@ The game is automatically deployed to GitHub Pages:
 - Check Tone.js library loaded successfully
 - Verify audio context is started
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Tone.js Documentation](https://tonejs.github.io/)
 - [Google Gemini API Documentation](https://ai.google.dev/docs)

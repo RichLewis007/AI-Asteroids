@@ -55,17 +55,17 @@
             transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.85);
             border-radius: 15px;
-            padding: 40px;
+            padding: 20px 40px 40px 40px;
             text-align: center;
             display: none;
             /* Start hidden */
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             border: 2px solid #0ff;
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
-            width: 80%;
-            max-width: 600px;
+            width: 90%;
+            max-width: 800px;
+            height: 70vh;
             z-index: 1000;
         }
 
@@ -130,16 +130,50 @@
             }
         }
 
+        #modal-header {
+            margin-bottom: 10px;
+        }
+
         #modal h1 {
             font-size: 48px;
-            margin-bottom: 10px;
+            margin-bottom: 0;
+            margin-top: 20px;
             color: #0ff;
+        }
+
+        #modal-content {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 120px); /* Subtract space for header and buttons */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #button-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+        }
+
+        #mission-briefing-container {
+            width: 70%;
+            height: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         #modal h2 {
             margin-top: 15px;
             margin-bottom: 10px;
             font-size: 20px;
+        }
+
+        #mission-briefing-title {
+            display: none;
         }
 
         #modal p {
@@ -233,7 +267,6 @@
         }
 
         #high-score-list,
-        #mission-briefing,
         #after-action-report {
             box-sizing: border-box;
             /* Ensures padding is included in height */
@@ -248,13 +281,38 @@
             border-radius: 5px;
             margin: 0;
             /* Removes default margin */
-            min-height: 50px;
+            min-height: 200px;
             white-space: pre-wrap;
             /* Allows line breaks */
-            max-height: 25vh;
-            /* Limit height to 25% of viewport height */
+            max-height: 40vh;
+            /* Limit height to 40% of viewport height */
             overflow-y: auto;
             /* Add scrollbar if content overflows */
+        }
+
+        #mission-briefing {
+            width: 100%;
+            height: calc(100% - 40px); /* Subtract space for h2 title */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-sizing: border-box;
+            list-style: none;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid #0ff;
+            border-radius: 5px;
+            margin: 0;
+            white-space: pre-wrap;
+            overflow-x: hidden;
+            overflow-y: auto;
+            word-wrap: break-word;
+            word-break: break-word;
+            font-size: 20px; /* Adjust this value to change text size of the pre-mission briefing */
+            text-align: left;
+            /* Override the shared styles that limit height */
+            max-height: none;
+            min-height: 0;
         }
 
         #high-score-list li {
@@ -289,6 +347,106 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+        /* High-Tech Loading Display for Mission Briefing */
+        #mission-tech-display {
+            position: relative;
+            width: 100%;
+            height: calc(100% - 40px); /* Subtract space for h2 title */
+            background: #000000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #mission-tech-content {
+            text-align: center;
+            color: #0ff;
+            padding: 20px;
+        }
+
+        #mission-tech-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0ff;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        #mission-tech-subtitle {
+            font-size: 10px;
+            margin-bottom: 20px;
+            color: #88f;
+            opacity: 0.8;
+        }
+
+        #mission-tech-grid {
+            display: grid;
+            grid-template-columns: repeat(17, 1fr);
+            gap: 2px;
+            margin: 20px 0;
+            width: 340px;
+            height: 120px;
+        }
+
+        .mission-tech-cell {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            animation: techCellPulse 2s ease-in-out infinite;
+            animation-delay: calc(var(--delay) * 0.1s);
+        }
+
+        #mission-tech-progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        #mission-tech-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0ff, #88f);
+            width: 0%;
+            animation: techProgress 3s ease-in-out infinite;
+        }
+
+        .mission-scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.8), transparent);
+            animation: scanLine 2s linear infinite;
+        }
+
+        #mission-tech-status {
+            font-size: 8px;
+            color: #88f;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        @keyframes techCellPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes techProgress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         /* High-Tech Loading Display */
@@ -482,7 +640,9 @@
         </div>
         <div id="modal">
             <div id="version-display">Loading...</div>
-            <h1 id="modal-title">AI ASTEROIDS</h1>
+            <div id="modal-header">
+                <h1 id="modal-title">AI ASTEROIDS</h1>
+            </div>
             <div id="modal-content">
                 <!-- Game Over Content -->
                 <div id="game-over-content">
@@ -499,9 +659,25 @@
                 </div>
                 <!-- Mission Briefing -->
                 <div id="mission-briefing-container">
-                    <h2>Mission Briefing</h2>
+                    <h2 id="mission-briefing-title">Mission Briefing</h2>
                     <div id="mission-briefing">
                         <div class="loader"></div>
+                    </div>
+                    <!-- High-Tech Display for Mission Briefing -->
+                    <div id="mission-tech-display">
+                        <div id="mission-tech-content">
+                            <div id="mission-tech-title">ANALYZING MISSION PLAN</div>
+                            <div id="mission-tech-subtitle">Generating Mission Briefing...</div>
+                            
+                            <div id="mission-tech-grid"></div>
+                            
+                            <div id="mission-tech-progress">
+                                <div id="mission-tech-bar"></div>
+                                <div class="mission-scan-line"></div>
+                            </div>
+                            
+                            <div id="mission-tech-status">Processing tactical intelligence...</div>
+                        </div>
                     </div>
                 </div>
                 <!-- After Action Report Display -->
@@ -544,6 +720,8 @@
         const gameOverContent = document.getElementById('game-over-content');
         const missionBriefingContainer = document.getElementById('mission-briefing-container');
         const missionBriefingEl = document.getElementById('mission-briefing');
+        const missionBriefingTitle = document.getElementById('mission-briefing-title');
+        const missionTechDisplay = document.getElementById('mission-tech-display');
         const afterActionReportContainer = document.getElementById('after-action-report-container');
         const afterActionReportEl = document.getElementById('after-action-report');
         const techLoadingOverlay = document.getElementById('tech-loading-overlay');
@@ -644,26 +822,34 @@
         }
 
         async function generateMission() {
+            // Hide the title initially
+            missionBriefingTitle.style.display = 'none';
+            
             // Check if API key is configured
             if (!API_KEY || API_KEY.trim() === "") {
                 // No API key - show fallback mission briefing immediately
                 missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingTitle.style.display = 'block';
                 return;
             }
 
-            // API key is configured - show loader and try to generate mission
-            missionBriefingEl.innerHTML = '<div class="loader"></div>';
+            // API key is configured - show tech display and try to generate mission
+            showMissionTechDisplay();
             const prompt = "Generate a short, exciting, one-paragraph mission briefing for a retro arcade space shooter game. The mission should have a clear objective, like protecting something, destroying a specific enemy faction, or clearing a dangerous sector. Give the enemy faction a cool, pulpy sci-fi name. Keep it under 50 words.";
             try {
                 const result = await fetchWithExponentialBackoff(API_URL, { contents: [{ parts: [{ text: prompt }] }] });
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                hideMissionTechDisplay();
                 missionBriefingEl.textContent = text || "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingTitle.style.display = 'block';
             } catch (error) {
+                hideMissionTechDisplay();
                 missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingTitle.style.display = 'block';
             }
         }
 
-        // Create animated tech grid
+        // Create animated tech grid for after-action reports
         function createTechGrid() {
             const grid = document.getElementById('tech-loading-grid');
             grid.innerHTML = '';
@@ -673,6 +859,57 @@
                 cell.className = 'tech-grid-cell';
                 cell.style.setProperty('--delay', i);
                 grid.appendChild(cell);
+            }
+        }
+
+        // Create animated tech grid for mission briefing
+        function createMissionTechGrid() {
+            const grid = document.getElementById('mission-tech-grid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 102; i++) { // 17x6 grid
+                const cell = document.createElement('div');
+                cell.className = 'mission-tech-cell';
+                cell.style.setProperty('--delay', i);
+                grid.appendChild(cell);
+            }
+        }
+
+        // Show mission tech display
+        function showMissionTechDisplay() {
+            missionTechDisplay.style.display = 'flex';
+            missionBriefingEl.style.display = 'none';
+            createMissionTechGrid();
+            
+            const statusMessages = [
+                'Processing tactical intelligence...',
+                'Analyzing threat patterns...',
+                'Generating mission parameters...',
+                'Compiling briefing data...',
+                'Finalizing mission objectives...'
+            ];
+            
+            let messageIndex = 0;
+            const statusEl = document.getElementById('mission-tech-status');
+            
+            const messageInterval = setInterval(() => {
+                statusEl.textContent = statusMessages[messageIndex];
+                messageIndex = (messageIndex + 1) % statusMessages.length;
+            }, 800);
+            
+            // Store interval ID for cleanup
+            missionTechDisplay.messageInterval = messageInterval;
+        }
+
+        // Hide mission tech display
+        function hideMissionTechDisplay() {
+            missionTechDisplay.style.display = 'none';
+            missionBriefingEl.style.display = 'block';
+            
+            // Clear the message interval
+            if (missionTechDisplay.messageInterval) {
+                clearInterval(missionTechDisplay.messageInterval);
+                missionTechDisplay.messageInterval = null;
             }
         }
 
@@ -913,6 +1150,9 @@
             afterActionReportContainer.style.display = 'none';
             reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
+            
+            // Ensure mission tech display is hidden initially
+            hideMissionTechDisplay();
             generateMission();
         }
 

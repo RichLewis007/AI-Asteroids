@@ -161,8 +161,8 @@ function generateLocalTestFile() {
         // Add testing notice to the page
         const testingNotice = `
     <div id="api-test-notice">
-        🧪 LOCAL TESTING MODE<br>
-        AI features enabled with your API key
+        RUNNING LOCALLY<br>
+        AI features are enabled with your API key
     </div>`;
         
         content = content.replace(

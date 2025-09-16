@@ -15,7 +15,7 @@
   
 > <div align="left">
 >   <div>
->     <p><strong>Legal disclaimer:</strong> These graphics are in no way intended to represent actual in-game graphics. In fact, they are meant to be <strong>deceiving</strong>, just as the original game packaging on contemporaneous retro games deceived millions of innocent children into buying games like Asteroids™. You have been warned.</p>
+>     <p><strong>Fake Legal Disclaimer:</strong> These graphics are in no way intended to represent actual in-game graphics. In fact, they are meant to be <strong>deceiving</strong>, just as the original game packaging on contemporaneous retro games deceived millions of innocent children into buying games like Asteroids™. You have been warned.</p>
 >   </div>
 > </div>
 
@@ -103,15 +103,15 @@ For developers who want to test the AI features without modifying the main `inde
    ```
    This automatically creates `local-index.html` from the main `index.html` file, inserts your API key, and opens it in your browser.
 
-3. **Test AI features:** The file includes a "🧪 LOCAL TESTING MODE" indicator and identical functionality to the main game
+3. **Test AI features:** The file includes a "RUNNING LOCALLY" indicator and identical functionality to the main game
 
 ### Benefits of Automated Local Testing
-- ✅ **Always up-to-date:** Local test file is automatically generated from the latest `index.html`
-- ✅ **No maintenance:** No need to manually sync changes between files
-- ✅ **Safe development:** Your API key stays local and won't be committed to GitHub
-- ✅ **Identical functionality:** Same game features as the main version
-- ✅ **No conflicts:** Doesn't affect the public GitHub Pages deployment
-- ✅ **Auto-opens browser:** Generated file opens automatically for immediate testing
+- **Always up-to-date:** Local test file is automatically generated from the latest `index.html`
+- **No maintenance:** No need to manually sync changes between files
+- **Safe development:** Your API key stays local and won't be committed to GitHub
+- **Identical functionality:** Same game features as the main version
+- **No conflicts:** Doesn't affect the public GitHub Pages deployment
+- **Auto-opens browser:** Generated file opens automatically for immediate testing
 
 ### Development Workflow
 ```bash
