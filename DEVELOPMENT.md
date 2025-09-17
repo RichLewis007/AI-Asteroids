@@ -77,7 +77,7 @@ A bash script that simplifies local development by checking for required configu
 - Validates .env file existence before running the development workflow
 - Provides step-by-step guidance for API key setup
 - Uses colored output for better user experience
-- Automatically runs `npm run dev` when properly configured (which generates and opens the local test file)
+- Automatically runs `npm run dev` when properly configured (which generates and opens the local html file)
 
 **Usage:**
 ```bash
@@ -108,7 +108,7 @@ node generate-local-html.js
 ```
 
 **What it updates:**
-- `local-index.html`: Creates local test file with API key
+- `local-index.html`: Creates local html file with API key
 - `package.json`: Updates version to latest git tag
 - `README.md`: Updates version badges and text
 
@@ -150,11 +150,11 @@ node generate-local-html.js
 3. For AI features, add your API key
 4. Make changes and test locally
 
-### Local Testing with AI Features
+### Local Running With AI Features
 
-For safe testing of AI features without exposing your API key to the repository:
+For safe local use of AI features without exposing your API key to the repository:
 
-#### Automated Local Testing Setup
+#### Automated Local Running Setup
 ```bash
 # 1. Set up your API key (one-time setup)
 cp .env.example .env
@@ -166,9 +166,9 @@ npm run dev
 
 This command:
 - **Automatically generates** `local-index.html` from the latest `index.html`
-- **Adds testing indicators** (visual notice, updated title)
+- **Adds running locally indicators** (visual notice, updated title)
 - **Automatically inserts your API key** from `.env` file
-- **Opens in browser** for immediate testing
+- **Opens in browser** for immediate use
 - **Always up-to-date** - no manual syncing required
 
 #### Development Workflow
@@ -178,17 +178,17 @@ cp .env.example .env
 # Edit .env with your actual API key
 
 # 2. Make changes to index.html
-# 3. Generate fresh local test file with API key
-npm run dev
-# 4. Test AI features locally
+# 3. Generate fresh local html file with API key
+npm run dev1`
+# 4. Run AI features locally
 # 5. Commit changes to index.html (not local-index.html)
 ```
 
 #### Benefits
-- **No maintenance overhead** - local test file is always current
+- **No maintenance overhead** - local html file is always current
 - **Safe development** - API key never gets committed
 - **Identical functionality** - same features as main game
-- **Easy testing** - just run `npm run dev` after any changes
+- **Easy local running** - just run `npm run dev` after any changes
 
 ## Deployment
 
@@ -213,7 +213,7 @@ The game is automatically deployed to GitHub Pages:
 
 ### Git Workflow
 1. Make changes
-2. Test locally
+2. Run locally
 3. Update CHANGELOG.md if needed
 4. Commit with descriptive messages
 5. Push to main branch

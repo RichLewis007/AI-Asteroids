@@ -52,7 +52,7 @@ This guide helps you see the AI features locally without exposing your API key t
    - Refresh the page in your browser
    - You should see "RUNNING LOCALLY" at the top
    - Start a game and play until you die
-   - Click "Generate Report" to see the AI after-action report
+   - The AI after-action report will be automatically generated and displayed
 
 ## What to see with AI key set
 

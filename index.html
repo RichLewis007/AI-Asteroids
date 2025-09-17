@@ -184,7 +184,7 @@
         }
 
         #report-modal h1 {
-            font-size: 48px;
+            font-size: 32px;
             margin-bottom: 0;
             margin-top: 0;
             color: #0ff;
@@ -193,15 +193,16 @@
         #report-modal-content {
             position: relative;
             width: 100%;
-            height: calc(100% - 120px);
+            height: calc(100% - 70px);
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: space-between;
         }
 
         #report-text-container {
             width: 85%;
-            height: 100%;
+            height: calc(100% - 40px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -294,13 +295,6 @@
             box-shadow: 0 0 20px #f0f, 0 0 40px #0ff;
         }
 
-        #report-button {
-            background: linear-gradient(45deg, #4caf50, #8bc34a);
-        }
-
-        #report-button:hover:not(:disabled) {
-            box-shadow: 0 0 20px #8bc34a;
-        }
 
         #high-score-button {
             background: linear-gradient(45deg, #ffc107, #ff9800);
@@ -788,7 +782,6 @@
             </div>
             <div id="button-container">
                 <button id="start-button" class="action-button">Start Game</button>
-                <button id="report-button" class="action-button" style="display:none;">✨ Generate Report</button>
                 <button id="high-score-button" class="action-button" style="display:none;">🏆 High Scores</button>
                 <button id="exit-button" class="action-button">🚪 Exit</button>
             </div>
@@ -807,7 +800,6 @@
         const modalScoreEl = document.getElementById('modal-score');
         const modalTitleEl = document.getElementById('modal-title');
         const startButton = document.getElementById('start-button');
-        const reportButton = document.getElementById('report-button');
         const highScoreButton = document.getElementById('high-score-button');
         const exitButton = document.getElementById('exit-button');
         const versionDisplay = document.getElementById('version-display');
@@ -929,7 +921,8 @@
             // Check if API key is configured
             if (!API_KEY || API_KEY.trim() === "") {
                 // No API key - show fallback mission briefing immediately
-                missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+                const fallbackText = "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingEl.textContent = fallbackText;
                 missionBriefingTitle.style.display = 'block';
                 return;
             }
@@ -941,11 +934,13 @@
                 const result = await fetchWithExponentialBackoff(API_URL, { contents: [{ parts: [{ text: prompt }] }] });
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
                 hideMissionTechDisplay();
-                missionBriefingEl.textContent = text || "Mission: Destroy all hostiles. Good luck, pilot.";
+                const finalText = text || "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingEl.textContent = finalText;
                 missionBriefingTitle.style.display = 'block';
             } catch (error) {
                 hideMissionTechDisplay();
-                missionBriefingEl.textContent = "Mission: Destroy all hostiles. Good luck, pilot.";
+                const fallbackText = "Mission: Destroy all hostiles. Good luck, pilot.";
+                missionBriefingEl.textContent = fallbackText;
                 missionBriefingTitle.style.display = 'block';
             }
         }
@@ -1062,6 +1057,7 @@
             modal.style.display = 'flex'; // Show the game over screen
         }
 
+
         // Screen fade out effect
         function startScreenFadeOut() {
             screenFadeOverlay.style.display = 'block';
@@ -1105,7 +1101,8 @@
             } catch (error) {
                 // Hide loading display and show error
                 hideTechLoading();
-                showReportModal("Error generating report. Please check your connection and try again.");
+                const errorText = "Error generating report. Please check your connection and try again.";
+                showReportModal(errorText);
             }
         }
 
@@ -1255,7 +1252,6 @@
             missionBriefingContainer.style.display = 'block';
             gameOverContent.style.display = 'none';
             highScoreDisplay.style.display = 'none';
-            reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
             
             // Ensure mission tech display is hidden initially
@@ -1275,15 +1271,13 @@
             modalScoreEl.innerHTML = `Final Score: ${score}`;
             highScoreForm.style.display = 'block';
 
-            reportButton.style.display = 'inline-block';
-            reportButton.disabled = false;
             highScoreButton.style.display = 'inline-block';
+
 
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
                 displayHighScores();
                 highScoreForm.style.display = 'none';
-                reportButton.style.display = 'none';
                 highScoreButton.style.display = 'none';
             }, 30000);
 
@@ -1304,15 +1298,12 @@
             modalScoreEl.innerHTML = `Final Score: ${score}`;
             highScoreForm.style.display = 'block';
 
-            reportButton.style.display = 'inline-block';
-            reportButton.disabled = false;
             highScoreButton.style.display = 'inline-block';
 
             clearTimeout(inactivityTimer);
             inactivityTimer = setTimeout(() => {
                 displayHighScores();
                 highScoreForm.style.display = 'none';
-                reportButton.style.display = 'none';
                 highScoreButton.style.display = 'none';
             }, 30000);
 
@@ -1439,16 +1430,10 @@
             clearTimeout(inactivityTimer);
         });
 
-        reportButton.addEventListener('click', async () => {
-            await startAudio();
-            generateReport(score);
-        });
-
         highScoreButton.addEventListener('click', async () => {
             await startAudio();
             clearTimeout(inactivityTimer);
             gameOverContent.style.display = 'none';
-            reportButton.style.display = 'none';
             highScoreButton.style.display = 'none';
             displayHighScores();
         });

@@ -19,12 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v.008] - 2025-08-21
 
 ### Added
-- Automated local testing file generation script (generate-local-test.js)
-- Automatic browser opening for generated local test files
-- Local testing documentation in README for developers
+- Automated local html file generation script (generate-local-html.js)
+- Automatic browser opening for generated local html files
+- Local running documentation in README for developers
 
 ### Changed
-- Local testing workflow now automated - no more manual file syncing required
+- Local runnnig workflow now automated - no more manual file syncing required
 - API key management now uses .env files for better security and convenience
 
 ## [v.007] - 2025-08-20
@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Development documentation (DEVELOPMENT.md) for maintainers
-- Local testing setup (local-index.html) for safe AI feature development
+- Local running setup (local-index.html) for safe AI feature use and development
 
 ### Changed
 - Mission briefing now shows fallback text immediately when no API key is set
@@ -127,7 +127,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exponential backoff retry logic for API calls
 - Mission briefing container and display
 - After-action report container and display
-- Report generation button
 - Error handling for API failures
 
 ### Changed

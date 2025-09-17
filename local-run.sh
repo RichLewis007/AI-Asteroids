@@ -3,14 +3,14 @@
 # Local Development Runner
 # 
 # This script checks for the presence of a .env file and runs the development workflow.
-# The development workflow generates the local test HTML file and opens it in the browser.
+# The development workflow generates the local HTML file and opens it in the browser.
 # If no .env file is found, it provides clear instructions on how to create and configure it.
 # 
 # Features:
 # - Validates .env file existence before running the development workflow
 # - Provides step-by-step guidance for API key setup
 # - Uses colored output for better user experience
-# - Automatically runs npm run dev when properly configured (which generates and opens the local test file)
+# - Automatically runs npm run dev when properly configured (which generates and opens the local html file)
 # 
 # Usage: ./local-run.sh
 # 

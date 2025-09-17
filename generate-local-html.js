@@ -114,11 +114,11 @@ function openInBrowser(filePath) {
     });
 }
 
-function generateLocalTestFile() {
+function generateLocalHtmlFile() {
     try {
         // Read the main index.html file
         const indexPath = path.join(__dirname, 'index.html');
-        const localTestPath = path.join(__dirname, 'local-index.html');
+        const localHtmlFilePath = path.join(__dirname, 'local-index.html');
         const envPath = path.join(__dirname, '.env');
         
         if (!fs.existsSync(indexPath)) {
@@ -152,28 +152,28 @@ function generateLocalTestFile() {
         
         content = content.replace(apiKeyRegex, replacement);
         
-        // Add a testing notice to the title
+        // Add a Local Running notice to the title
         content = content.replace(
             '<title>AI Asteroids</title>',
-            '<title>AI Asteroids - Local Testing</title>'
+            '<title>AI Asteroids - Running Locally</title>'
         );
         
-        // Add testing notice to the page
-        const testingNotice = `
-    <div id="api-test-notice">
+        // Add local running notice to the page
+        const localRunNotice = `
+    <div id="api-use-notice">
         RUNNING LOCALLY<br>
         AI features are enabled with your API key
     </div>`;
         
         content = content.replace(
             '<body>',
-            `<body>${testingNotice}`
+            `<body>${localRunNotice}`
         );
         
-        // Add CSS for the testing notice
-        const testingNoticeCSS = `
-        /* API Key Testing Notice */
-        #api-test-notice {
+        // Add CSS for the local running notice
+        const localRunNoticeCSS = `
+        /* API Key Local Running Notice */
+        #api-use-notice {
             position: fixed;
             top: 10px;
             left: 10px;
@@ -184,20 +184,50 @@ function generateLocalTestFile() {
             font-size: 12px;
             z-index: 1001;
             max-width: 300px;
+            opacity: 1;
+            transition: opacity 2s ease-out;
+        }
+        
+        #api-use-notice.fade-out {
+            opacity: 0;
         }`;
         
         content = content.replace(
             '</style>',
-            `${testingNoticeCSS}
+            `${localRunNoticeCSS}
         </style>`
         );
         
-        // Get the latest version and update version display for local testing
+        // Add JavaScript to fade the notice after 6 seconds
+        const fadeNoticeJS = `
+        // Fade out the local running notice after 6 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const notice = document.getElementById('api-use-notice');
+            if (notice) {
+                setTimeout(() => {
+                    notice.classList.add('fade-out');
+                    // Remove the element after fade completes
+                    setTimeout(() => {
+                        if (notice.parentNode) {
+                            notice.parentNode.removeChild(notice);
+                        }
+                    }, 2000); // Match CSS transition duration
+                }, 6000); // 6 seconds
+            }
+        });`;
+        
+        content = content.replace(
+            '</script>',
+            `${fadeNoticeJS}
+        </script>`
+        );
+        
+        // Get the latest version and update version display for local running
         const latestVersion = getLatestVersion();
         if (latestVersion) {
             content = content.replace(
                 /const fallbackVersion = "[^"]*";/,
-                `const fallbackVersion = "${latestVersion} (Local Test)";`
+                `const fallbackVersion = "${latestVersion} (Running Locally)";`
             );
             
             // Also update package.json and README.md versions
@@ -205,30 +235,30 @@ function generateLocalTestFile() {
             updateReadmeVersion(latestVersion);
         } else {
             // Keep the original version if we can't get git tag
-            console.log('• Keeping original version in local test file');
+            console.log('• Keeping original version in local html file');
         }
         
-        // Write the local test file
-        fs.writeFileSync(localTestPath, content, 'utf8');
+        // Write the local html file
+        fs.writeFileSync(localHtmlFilePath, content, 'utf8');
         
         console.log('• Successfully generated local-index.html');
-        console.log('• Local testing file is ready for development');
+        console.log('• Local html file is ready for development');
         
         if (apiKey) {
-            console.log('• AI features are ready to test!');
+            console.log('• AI features are ready to use!');
         } else {
             console.log('• Remember to replace YOUR_API_KEY_HERE with your actual API key');
             console.log('• Or create a .env file with: GEMINI_API_KEY=your_key_here');
         }
         
         // Open the generated file in the default browser
-        openInBrowser(localTestPath);
+        openInBrowser(localHtmlFilePath);
         
     } catch (error) {
-        console.error('• Error generating local test file:', error.message);
+        console.error('• Error generating local html file:', error.message);
         process.exit(1);
     }
 }
 
 // Run the script
-generateLocalTestFile();
+generateLocalHtmlFile();
