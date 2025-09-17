@@ -1,4 +1,4 @@
-# Running Locally
+# Running the game locally with enabled AI features
 
 This guide helps you see the AI features locally without exposing your API key to GitHub.
 
